@@ -1,0 +1,20 @@
+Package: corto
+Type: Package
+Title: CorTo: Correlation Tool, a simple package to infer correlation networks
+    using Data Processing Inequality (DPI).
+Version: 0.1.1
+Authors@R: person("Federico M.", "Giorgi", email = "federico.giorgi@gmail.com",
+  role = c("aut", "cre"))
+Maintainer: Federico M. Giorgi <federico.giorgi@gmail.com>
+Description: corto is a simple package to infer correlation networks
+License: LGPL-3
+Encoding: UTF-8
+LazyData: TRUE
+RoxygenNote: 6.1.1
+Depends: R (>= 3.5)
+NeedsCompilation: no
+Imports:
+VignetteBuilder: 
+    utils,
+    knitr,
+    rmarkdown
