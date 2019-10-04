@@ -102,7 +102,6 @@ funcombos<-function(inp,tmat,groups,r){
 #' @param r A numeric correlation threshold
 #' @return A matrix describing which edges were significant in the input matrix
 #' matrix according to the r correlation threshold provided
-#' @export
 fcor<-function(inmat,centroids,r){
   tmat<-t(inmat)
   nfeatures<-ncol(tmat)
@@ -135,7 +134,6 @@ fcor<-function(inmat,centroids,r){
 #' @param seed An integer to set the random seed
 #' @return A matrix describing which edges were significant in the bootstrapped
 #' matrix according to the r correlation threshold provided
-#' @export
 bootmat<-function(inmat,centroids,r,seed=NULL){
   set.seed(seed)
   bootmat<-inmat[,sample(colnames(inmat),replace=TRUE)]
@@ -154,7 +152,6 @@ bootmat<-function(inmat,centroids,r,seed=NULL){
 #' @param selected_edges A character vector indicating which edges will be considered
 #' @param targets  A character vector indicating the targets
 #' @return A character vector with edges selected in this bootstrap
-#' @export
 funboot<-function(seed=0,inmat,centroids,r,selected_edges,targets){
   bootsigedges<-bootmat(inmat,centroids,r,seed=seed)
 

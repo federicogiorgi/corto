@@ -78,14 +78,24 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   message("Running ",nbootstraps," bootstraps with ",nthreads," thread(s)")
 
   # Run the bootstraps in multithreading
-  cl<-makeCluster(nthreads)
-  #clusterExport(cl,c("fcor","bootmat"))
-  winnerlist<-clusterApply(cl,1:nbootstraps,funboot,inmat=inmat,
-    centroids=centroids,r=r,selected_edges=selected_edges,targets=targets)
+  cl<-snow::makeCluster(nthreads)
+  registerDoSNOW(cl)
+  pb<-txtProgressBar(0,nbootstraps,style=3)
+  progress<-function(n){
+    setTxtProgressBar(pb,n)
+  }
+  opts<-list(progress=progress)
+  i<-0
+  winnerlist<-foreach(i=1:nbootstraps,.combine=c,.options.snow=opts) %dopar% {
+    s<-funboot(i,inmat=inmat,centroids=centroids,r=r,
+              selected_edges=selected_edges,targets=targets)
+    return(s)
+  }
+  close(pb)
   stopCluster(cl)
 
   # Add occurrences
-  add<-table(unlist(winnerlist))
+  add<-table(winnerlist)
   occ[names(add),"occurrences"]<-occ[names(add),"occurrences"]+add
 
   # Likelihood based on bootstrap occurrence

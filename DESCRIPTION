@@ -2,7 +2,7 @@ Package: corto
 Type: Package
 Title: CorTo: Correlation Tool, a simple package to infer correlation networks
   using Data Processing Inequality (DPI)
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: person("Federico M.", "Giorgi", email = "federico.giorgi@gmail.com",
   role = c("aut", "cre"))
 Maintainer: Federico M. Giorgi <federico.giorgi@gmail.com>
@@ -23,4 +23,6 @@ NeedsCompilation: no
 Imports:
   stats,
   utils,
-  snow
+  doSNOW,
+  snow,
+  foreach

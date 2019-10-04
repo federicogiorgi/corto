@@ -25,7 +25,9 @@ unlink("NAMESPACE")
 document()
 cat('importFrom("stats", "cor", "pt", "qt", "setNames", "var")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("utils", "setTxtProgressBar", "txtProgressBar")\n',file="NAMESPACE",append=TRUE)
-cat('importFrom("snow", "makeCluster", "clusterExport", "clusterApply", "stopCluster")\n',file="NAMESPACE",append=TRUE)
+cat('import("doSNOW")\n',file="NAMESPACE",append=TRUE)
+cat('import("snow")\n',file="NAMESPACE",append=TRUE)
+cat('import("foreach")\n',file="NAMESPACE",append=TRUE)
 
 # # Remove .Rhistory
 # unlink(".Rhistory")
