@@ -94,7 +94,15 @@ funcombos<-function(inp,tmat,groups,r){
 # }
 
 
-# Fast correlation
+
+
+#' A fast correlation function
+#' @param inmat An input matrix with features as rows and samples as columns
+#' @param centroids A character vector indicating the centroids
+#' @param r A numeric correlation threshold
+#' @return A matrix describing which edges were significant in the input matrix
+#' matrix according to the r correlation threshold provided
+#' @export
 fcor<-function(inmat,centroids,r){
   tmat<-t(inmat)
   nfeatures<-ncol(tmat)
@@ -120,8 +128,15 @@ fcor<-function(inmat,centroids,r){
   return(sigedges)
 }
 
-# Function to bootstrap
-bootfun<-function(inmat,centroids,r,seed=NULL){
+#' Function to bootstrap matrix
+#' @param inmat An input matrix with features as rows and samples as columns
+#' @param centroids A character vector indicating the centroids
+#' @param r A numeric correlation threshold
+#' @param seed An integer to set the random seed
+#' @return A matrix describing which edges were significant in the bootstrapped
+#' matrix according to the r correlation threshold provided
+#' @export
+bootmat<-function(inmat,centroids,r,seed=NULL){
   set.seed(seed)
   bootmat<-inmat[,sample(colnames(inmat),replace=TRUE)]
   # Calculate correlations in the bootstrapped matrix
@@ -130,4 +145,63 @@ bootfun<-function(inmat,centroids,r,seed=NULL){
   options(warn=0)
   return(bootsigedges)
 }
+
+#' Function to process bootstraps into edges
+#' @param seed An integer to set the random seed
+#' @param inmat An input matrix with features as rows and samples as columns
+#' @param centroids A character vector indicating the centroids
+#' @param r A numeric correlation threshold
+#' @param selected_edges A character vector indicating which edges will be considered
+#' @param targets  A character vector indicating the targets
+#' @return A character vector with edges selected in this bootstrap
+#' @export
+funboot<-function(seed=0,inmat,centroids,r,selected_edges,targets){
+  bootsigedges<-bootmat(inmat,centroids,r,seed=seed)
+
+  # Get surviving edges
+  filtered<-bootsigedges[bootsigedges[,1]%in%centroids,]
+  rm(bootsigedges)
+  filtered[,1]<-as.character(filtered[,1])
+  filtered[,2]<-as.character(filtered[,2])
+  filtered[,3]<-as.numeric(as.character(filtered[,3]))
+  rownames(filtered)<-paste0(filtered[,1],"_",filtered[,2])
+  filtered<-filtered[intersect(rownames(filtered),selected_edges),]
+
+  # Test all edges triplets for winners
+  winners<-matrix(nrow=0,ncol=3)
+  for(tg in targets){
+    tf_candidates<-filtered[filtered[,2]==tg,]
+    tf_candidate<-tf_candidates[which.max(abs(tf_candidates[,3])),]
+    winners<-rbind(winners,tf_candidate)
+  }
+  # Return surviving edges in bootstrap
+  return(rownames(winners))
+}
+
+#' r2p Convert Correlation Coefficient to P-value
+#' @param r the correlation coefficient
+#' @param n the number of samples
+#' @return a numeric p-value
+#' @examples
+#' r2p(r=0.4,n=20) # 0.08
+#' @export
+r2p<-function(r,n){
+  t<-(r*sqrt(n-2)) / sqrt(1-(r^2))
+  p<-2*pt(t,df=n-2,lower.tail=FALSE)
+  return(p)
+}
+
+#' p2r Convert a P-value to the corresponding Correlation Coefficient
+#' @param p the p-value
+#' @param n the number of samples
+#' @return a correlation coefficient
+#' @examples
+#' p2r(p=0.08,n=20)
+#' @export
+p2r<-function(p,n){
+  t<-qt(p/2,df=n-2,lower.tail=FALSE)
+  r<-sqrt((t^2)/(n-2+t^2))
+  return(r)
+}
+
 

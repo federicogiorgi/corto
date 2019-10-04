@@ -4,7 +4,7 @@
 \alias{corto}
 \title{Calculate a regulon from a data matrix}
 \usage{
-corto(inmat, centroids, nbootstraps = 100, p = 1e-30)
+corto(inmat, centroids, nbootstraps = 100, p = 1e-30, nthreads = 1)
 }
 \arguments{
 \item{inmat}{Input matrix, with features (e.g. genes) as rows and samples
@@ -16,6 +16,8 @@ to consider as centroids (a.k.a. Master Regulators) for DPI}
 \item{nbootstraps}{Number of bootstraps to be performed. Default is 100}
 
 \item{p}{The p-value threshold for correlation significance (by default 1E-30)}
+
+\item{nthreads}{The number of threads to use for bootstrapping. Default is 1}
 }
 \value{
 A list (object of class regulon), where each element is a centroid

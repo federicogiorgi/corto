@@ -9,6 +9,7 @@
 #' to consider as centroids (a.k.a. Master Regulators) for DPI
 #' @param nbootstraps Number of bootstraps to be performed. Default is 100
 #' @param p The p-value threshold for correlation significance (by default 1E-30)
+#' @param nthreads The number of threads to use for bootstrapping. Default is 1
 #' @return A list (object of class regulon), where each element is a centroid
 #' \itemize{
 #'   \item tfmode: a named vector containing correlation coefficients between
@@ -23,7 +24,7 @@
 #' # Run corto
 #' regulon <- corto(inmat,centroids=centroids)
 #' @export
-corto<-function(inmat,centroids,nbootstraps=100,p=1E-30){
+corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   # Analytical inference of threshold
   ncol<-ncol(inmat)
   nrow<-nrow(inmat)
@@ -74,37 +75,23 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30){
   colnames(occ)[4]<-"occurrences"
 
   # Now run bootstraps to check the number of wins
-  message("Running ",nbootstraps," bootstraps")
-  pb<-txtProgressBar(0,nbootstraps,style=3)
-  for(i in 1:nbootstraps){
-    bootsigedges<-bootfun(inmat,centroids,r,seed=i)
+  message("Running ",nbootstraps," bootstraps with ",nthreads," thread(s)")
 
-    # Get surviving edges
-    filtered<-bootsigedges[bootsigedges[,1]%in%centroids,]
-    rm(bootsigedges)
-    filtered[,1]<-as.character(filtered[,1])
-    filtered[,2]<-as.character(filtered[,2])
-    filtered[,3]<-as.numeric(as.character(filtered[,3]))
-    rownames(filtered)<-paste0(filtered[,1],"_",filtered[,2])
-    filtered<-filtered[intersect(rownames(filtered),selected_edges),]
+  # Run the bootstraps in multithreading
+  cl<-makeCluster(nthreads)
+  #clusterExport(cl,c("fcor","bootmat"))
+  winnerlist<-clusterApply(cl,1:nbootstraps,funboot,inmat=inmat,
+    centroids=centroids,r=r,selected_edges=selected_edges,targets=targets)
+  stopCluster(cl)
 
-    # Test all edges triplets for winners
-    winners<-matrix(nrow=0,ncol=3)
-    for(tg in targets){
-      tf_candidates<-filtered[filtered[,2]==tg,]
-      tf_candidate<-tf_candidates[which.max(abs(tf_candidates[,3])),]
-      winners<-rbind(winners,tf_candidate)
-    }
-    # Update original count for occurrences
-    occ[rownames(winners),4]<-occ[rownames(winners),4]+1
-
-    # Update progress bar
-    setTxtProgressBar(pb,i)
-  }
+  # Add occurrences
+  add<-table(unlist(winnerlist))
+  occ[names(add),"occurrences"]<-occ[names(add),"occurrences"]+add
 
   # Likelihood based on bootstrap occurrence
   message("Calculating edge likelihood")
   occ$likelihood<-occ$occurrences/nbootstraps
+  occ<-occ[occ$likelihood>0,]
 
   # Generate regulon object
   message("Generating regulon object")
@@ -125,29 +112,4 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30){
 }
 
 
-#' r2p Convert Correlation Coefficient to P-value
-#' @param r the correlation coefficient
-#' @param n the number of samples
-#' @return a numeric p-value
-#' @examples
-#' r2p(r=0.4,n=20) # 0.08
-#' @export
-r2p<-function(r,n){
-  t<-(r*sqrt(n-2)) / sqrt(1-(r^2))
-  p<-2*pt(t,df=n-2,lower=FALSE)
-  return(p)
-}
-
-#' p2r Convert a P-value to the corresponding Correlation Coefficient
-#' @param p the p-value
-#' @param n the number of samples
-#' @return a correlation coefficient
-#' @examples
-#' p2r(p=0.08,n=20)
-#' @export
-p2r<-function(p,n){
-  t<-qt(p/2,df=n-2,lower=FALSE)
-  r<-sqrt((t^2)/(n-2+t^2))
-  return(r)
-}
 

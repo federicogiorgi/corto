@@ -21,8 +21,11 @@
 
 # Building manuals and namespace using roxygen2
 library(devtools)
+unlink("NAMESPACE")
 document()
-
+cat('importFrom("stats", "cor", "pt", "qt", "setNames", "var")\n',file="NAMESPACE",append=TRUE)
+cat('importFrom("utils", "setTxtProgressBar", "txtProgressBar")\n',file="NAMESPACE",append=TRUE)
+cat('importFrom("snow", "makeCluster", "clusterExport", "clusterApply", "stopCluster")\n',file="NAMESPACE",append=TRUE)
 
 # # Remove .Rhistory
 # unlink(".Rhistory")
