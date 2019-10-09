@@ -1,34 +1,7 @@
-# Variance of rows for arrays with NA values
-f.rvar.na <- function(x) {
-  ave <- as.vector(f.rmean.na(x))
-  pos <- which(is.na(x))
-  largo <- f.rlength.na(x)
-  x[pos] <- rep(ave,ncol(x))[pos]
-  (x-ave)^2 %*% rep(1,ncol(x))/(largo-1)
-}
-
-# Mean of rows for arrays with NA values
-f.rmean.na <- function(x) {
-  largo <- f.rlength.na(x)
-  x[is.na(x)] <- 0
-  res <- x %*% rep(1,ncol(x)) / largo
-  names(res) <- rownames(x)
-  res
-}
-
-# Length of rows for arrays with NA values
-f.rlength.na <- function(x) {
-  r <- x/x
-  r[x==0] <- 1
-  r[!is.finite(r)] <- 0
-  r %*% rep(1,ncol(r))
-}
-
 # Max of absolute value
 maxabs<-function(x){
   max(abs(x))
 }
-
 
 # Function to extract correlation indeces
 extract<-function(mat,x,y){
@@ -212,3 +185,62 @@ p2r<-function(p,n){
 }
 
 
+#' kmgformat - Nice Formatting of Numbers
+#'
+#' This function will convert thousand numbers to K, millions to M, billions
+#' to G, trillions to T, quadrillions to P
+#'
+#' @param input A vector of values
+#' @param roundParam How many decimal digits you want
+#' @return A character vector of formatted numebr names
+#' @examples
+#' # Thousands
+#' set.seed(1)
+#' a<-runif(1000,0,1e4)
+#' plot(a,yaxt='n')
+#' kmg<-kmgformat(pretty(a))
+#' axis(2,at=pretty(a),labels=kmg)
+#'
+#' # Millions to Billions
+#' set.seed(1)
+#' a<-runif(1000,0,1e9)
+#' plot(a,yaxt='n',pch=20,col="black")
+#' kmg<-kmgformat(pretty(a))
+#' axis(2,at=pretty(a),labels=kmg)
+#' @export
+kmgformat <- function(input, roundParam = 1) {
+  signs <- sign(input)
+  signs[signs == 1] <- ""
+  signs[signs == -1] <- "-"
+  absinput <- abs(input)
+  output <- c()
+  for (i in absinput) {
+    if (i < 1000) {
+      output <- c(output, i)
+    } else if (i < 1e+06) {
+      i <- round(i/1000, roundParam)
+      i <- paste0(i, "K")
+      output <- c(output, i)
+    } else if (i < 1e+09) {
+      i <- round(i/1e+06, roundParam)
+      i <- paste0(i, "M")
+      output <- c(output, i)
+    } else if (i < 1e+12) {
+      i <- round(i/1e+09, roundParam)
+      i <- paste0(i, "G")
+      output <- c(output, i)
+    } else if (i < 1e+15) {
+      i <- round(i/1e+12, roundParam)
+      i <- paste0(i, "T")
+      output <- c(output, i)
+    } else if (i < 1e+18) {
+      i <- round(i/1e+15, roundParam)
+      i <- paste0(i, "P")
+      output <- c(output, i)
+    } else {
+      output <- c(output, i)
+    }
+  }
+  output <- paste0(signs, output)
+  return(output)
+}
