@@ -55,22 +55,25 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   filtered[,3]<-as.numeric(as.character(filtered[,3]))
   rownames(filtered)<-paste0(filtered[,1],"_",filtered[,2])
   selected_edges<-rownames(filtered)
-  message(length(selected_edges)," edges passed the initial threshold")
+  message(nrow(filtered)," edges passed the initial threshold")
   selected_nodes<-unique(c(filtered[,1],filtered[,2]))
   centroids<-intersect(centroids,selected_nodes)
   targets<-setdiff(selected_nodes,centroids)
-  message("Building network with ",length(centroids)," centroids and ",
+  message("Building DPI network from ",length(centroids)," centroids and ",
           length(targets)," targets")
 
   # DPI: Test all edges triplets for winners
-  winners<-matrix(nrow=0,ncol=3)
-  for(tg in targets){
-    tf_candidates<-filtered[filtered[,2]==tg,]
-    tf_candidate<-tf_candidates[which.max(abs(tf_candidates[,3])),]
-    winners<-rbind(winners,tf_candidate)
-  }
+  # winners<-matrix(nrow=0,ncol=3)
+  # for(tg in targets){ # TO DO an apply
+  #   tf_candidates<-filtered[filtered[,2]==tg,]
+  #   tf_candidate<-tf_candidates[which.max(abs(tf_candidates[,3])),]
+  #   winners<-rbind(winners,tf_candidate)
+  # }
+  colnames(filtered)<-c("centroid","tg","cor")
+  winners<-as.matrix(filtered %>% group_by(tg) %>% filter(abs(cor)==maxabs(cor)))
+  rownames(winners)<-paste0(winners[,1],"_",winners[,2])
   occ<-cbind(filtered,rep(0,nrow(filtered)))
-  #occ[rownames(winners),4]<-100
+  occ[rownames(winners),4]<-100
   rm(winners,filtered)
   colnames(occ)[4]<-"occurrences"
 

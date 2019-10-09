@@ -24,6 +24,12 @@ f.rlength.na <- function(x) {
   r %*% rep(1,ncol(r))
 }
 
+# Max of absolute value
+maxabs<-function(x){
+  max(abs(x))
+}
+
+
 # Function to extract correlation indeces
 extract<-function(mat,x,y){
   mat[x+nrow(mat)*(y-1)]
@@ -165,12 +171,16 @@ funboot<-function(seed=0,inmat,centroids,r,selected_edges,targets){
   filtered<-filtered[intersect(rownames(filtered),selected_edges),]
 
   # Test all edges triplets for winners
-  winners<-matrix(nrow=0,ncol=3)
-  for(tg in targets){
-    tf_candidates<-filtered[filtered[,2]==tg,]
-    tf_candidate<-tf_candidates[which.max(abs(tf_candidates[,3])),]
-    winners<-rbind(winners,tf_candidate)
-  }
+  # winners<-matrix(nrow=0,ncol=3)
+  # for(tg in targets){
+  #   tf_candidates<-filtered[filtered[,2]==tg,]
+  #   tf_candidate<-tf_candidates[which.max(abs(tf_candidates[,3])),]
+  #   winners<-rbind(winners,tf_candidate)
+  # }
+  colnames(filtered)<-c("centroid","tg","cor")
+  winners<-as.matrix(filtered %>% group_by(tg) %>% filter(abs(cor)==maxabs(cor)))
+  rownames(winners)<-paste0(winners[,1],"_",winners[,2])
+
   # Return surviving edges in bootstrap
   return(rownames(winners))
 }

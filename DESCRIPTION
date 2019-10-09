@@ -25,4 +25,5 @@ Imports:
   utils,
   doSNOW,
   snow,
-  foreach
+  foreach,
+  dplyr
