@@ -34,9 +34,10 @@ cat('importFrom("dplyr", "%>%", "filter", "group_by")\n',file="NAMESPACE",append
 cat('importFrom("graphics", "abline", "grid", "layout", "legend", "lines",
            "par", "plot", "rect", "text")\n',file="NAMESPACE",append=TRUE)
 build()
-check(document=FALSE)
+check(document=FALSE,args = c('--as-cran'))
 
 # # Remove .Rhistory
 # unlink(".Rhistory")
 # unlink("R/.Rhistory")
+
 

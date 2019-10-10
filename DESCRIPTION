@@ -1,17 +1,17 @@
 Package: corto
 Type: Package
-Title: CorTo: Correlation Tool, a simple package to infer co-occurrence networks
-  using Spearman correlation and Data Processing Inequality (DPI)
+Title: The CorTo package: a Simple Package to Infer Co-Occurrence Networks
+  using Spearman Correlation and Data Processing Inequality (DPI)
 Version: 0.99.0
 Authors@R: c(
   person("Federico M.","Giorgi",email = "federico.giorgi@gmail.com",role=c("aut","cre")),
   person("Daniele","Mercatelli",email = "danielemercatelli@gmail.com",role="ctb"),
   person("Gonzalo","Lopez-Garcia",email = "gonzolgarcia@gmail.com",role="ctb"))
 Maintainer: Federico M. Giorgi <federico.giorgi@gmail.com>
-Description: corto is a simple package to infer correlation networks using DPI
-  and bootstrapping to recover edges. An initial step is performed to calculate
-  all significant edges between a list of source nodes ("centroids") and target
-  genes.
+Description: We present corto (Correlation Tool) is a simple package to infer
+  correlation networks using DPI and bootstrapping to recover edges. An initial
+  step is performed to calculate all significant edges between a list of source
+  nodes ("centroids") and target genes.
   Then all triplets containing two centroids and one target are tested
   in a DPI step which removes edges. A bootstrapping process then calculates
   the robustness of the network, eventually re-adding edges previously removed
