@@ -1,8 +1,8 @@
 Package: corto
 Type: Package
-Title: CorTo: Correlation Tool, a simple package to infer correlation networks
-  using Data Processing Inequality (DPI)
-Version: 0.3.0
+Title: CorTo: Correlation Tool, a simple package to infer co-occurrence networks
+  using Spearman correlation and Data Processing Inequality (DPI)
+Version: 0.99.0
 Authors@R: c(
   person("Federico M.","Giorgi",email = "federico.giorgi@gmail.com",role=c("aut","cre")),
   person("Daniele","Mercatelli",email = "danielemercatelli@gmail.com",role="ctb"),
@@ -28,4 +28,7 @@ Imports:
   doSNOW,
   snow,
   foreach,
-  dplyr
+  dplyr,
+  knitr,
+  rmarkdown
+VignetteBuilder: knitr

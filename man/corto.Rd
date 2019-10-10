@@ -37,5 +37,5 @@ load(system.file("extdata","inmat.rda",package="corto",mustWork=TRUE))
 # Load centroids
 load(system.file("extdata","centroids.rda",package="corto",mustWork=TRUE))
 # Run corto
-regulon <- corto(inmat,centroids=centroids)
+regulon <- corto(inmat,centroids=centroids,nthreads=2)
 }

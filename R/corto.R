@@ -22,7 +22,7 @@
 #' # Load centroids
 #' load(system.file("extdata","centroids.rda",package="corto",mustWork=TRUE))
 #' # Run corto
-#' regulon <- corto(inmat,centroids=centroids)
+#' regulon <- corto(inmat,centroids=centroids,nthreads=2)
 #' @export
 corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   # Analytical inference of threshold
@@ -73,7 +73,8 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   winners<-as.matrix(filtered %>% group_by(tg) %>% filter(abs(cor)==maxabs(cor)))
   rownames(winners)<-paste0(winners[,1],"_",winners[,2])
   occ<-cbind(filtered,rep(0,nrow(filtered)))
-  occ[rownames(winners),4]<-100
+  # Appearing in the original matrix counts as one evidence
+  occ[rownames(winners),4]<-1
   rm(winners,filtered)
   colnames(occ)[4]<-"occurrences"
 
@@ -103,7 +104,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
 
   # Likelihood based on bootstrap occurrence
   message("Calculating edge likelihood")
-  occ$likelihood<-occ$occurrences/nbootstraps
+  occ$likelihood<-occ$occurrences/(nbootstraps+1)
   occ<-occ[occ$likelihood>0,]
 
   # Generate regulon object
