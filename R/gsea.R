@@ -687,7 +687,7 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
     par(mar = c(0, 4.1, 2, 2.1))
     plot(x=NULL,y=NULL,xlim=range(c(1,N)), ylim=range(c(min.plot, max.plot)), sub = "", xlab = "", ylab = "Running Enrichment Score",
          pch = 20, lwd = 2, cex = 1, xaxt = "n",
-         yaxs = "r", main = NULL)
+         yaxs = "r", main = title)
     grid(col = "light grey", lty = 2)
     lines(ind, running_score1, sub = "", xlab = "", ylab = "Enrichment Score",
           lwd = 2, cex = 1, col = twoColors[1])

@@ -12,8 +12,8 @@ vignette: >
 ---
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#"
+  collapse=TRUE,
+  comment="#"
 )
 ```
 
@@ -28,7 +28,7 @@ In brief, _corto_ operates using the following steps:
 4. All edges are tested for Data Processing Inequality in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [8]). This step can be run in parallel by specifiying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
 5. A network is generated in the form of a list, where each element is a centroid-based list of targets. In order to follow the structure of the _regulon_ class implemented by downstream analysis packages (e.g. VIPER [11]), each target is characterized by two parameters:
     + The _tfmode_, the mode of action, i.e. the Spearman correlation coefficient between the target and the centroid in the original input matrix
-    + The _likelihood_ of the interaction, calculated as the number of bootstraps in which the edge survives DPI, divided by the total number of bootstraps (in this impelmentation, the analysis in the original, non-bootstrapped matrix is )
+    + The _likelihood_ of the interaction, calculated as the number of bootstraps in which the edge survives DPI, divided by the total number of bootstraps (in this impelmentation, the presence of an edge in the original, non-bootstrapped matrix is considered as an additional evidence)
 
 
 # Running _corto_
@@ -42,7 +42,7 @@ Then, load it:
 library(corto)
 ```
 
-Then, you can see how the input matrix looks like. For example, this dataset comes from the TCGA mesothelioma project [12] and measures the expression of 20413 genes across 87 samples:
+Then, you can see how the input matrix looks like. For example, this dataset comes from the TCGA mesothelioma project [12] and measures the expression of 10021 genes across 87 samples:
 ```{r load1}
 load(system.file("extdata","inmat.rda",package="corto"))
 inmat[1:5,1:5]
@@ -60,16 +60,16 @@ centroids[15]
 length(centroids)
 ```
 
-Finally, we can run _corto_. In this example, we will run it with p-value threshold of 1e-30, 100 bootstraps and 2 threads
+Finally, we can run _corto_. In this example, we will run it with p-value threshold of 1e-30, 10 bootstraps and 2 threads
 ```{r runcorto,message=FALSE,results="hide"}
-regulon<-corto(inmat,centroids=centroids,nbootstraps=100,p=1e-30,nthreads=2)
-# Input Matrix has 87 samples and 20413 features
+regulon<-corto(inmat,centroids=centroids,nbootstraps=10,p=1e-30,nthreads=2)
+# Input Matrix has 87 samples and 10021 features
 # Correlation Coefficient Threshold is: 0.889962633618839
-# Removed 543 features with zero variance
+# Removed 112 features with zero variance
 # Calculating pairwise correlations
 # Initial testing of triplets for DPI
-# 496 edges passed the initial threshold
-# Building DPI network from 48 centroids and 265 targets
+# 246 edges passed the initial threshold
+# Building DPI network from 37 centroids and 136 targets
 # Running 100 bootstraps with 2 thread(s)
 # Calculating edge likelihood
 # Generating regulon object
@@ -80,7 +80,7 @@ The regulon object is a list:
 regulon[1:2]
 ```
 
-The regulon in this dataset is composed of 48 final centroids with at least one target:
+The regulon in this dataset is composed of 34 final centroids with at least one target:
 ```{r prinregulon2}
 length(regulon)
 ```

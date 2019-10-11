@@ -151,6 +151,7 @@ funboot<-function(seed=0,inmat,centroids,r,selected_edges,targets){
   #   winners<-rbind(winners,tf_candidate)
   # }
   colnames(filtered)<-c("centroid","tg","cor")
+  tg<-filtered[,"tg"]
   winners<-as.matrix(filtered %>% group_by(tg) %>% filter(abs(cor)==maxabs(cor)))
   rownames(winners)<-paste0(winners[,1],"_",winners[,2])
 

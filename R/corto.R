@@ -22,7 +22,7 @@
 #' # Load centroids
 #' load(system.file("extdata","centroids.rda",package="corto",mustWork=TRUE))
 #' # Run corto
-#' regulon <- corto(inmat,centroids=centroids,nthreads=2)
+#' regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10)
 #' @export
 corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   # Analytical inference of threshold
@@ -70,6 +70,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   #   winners<-rbind(winners,tf_candidate)
   # }
   colnames(filtered)<-c("centroid","tg","cor")
+  tg<-filtered[,"tg"]
   winners<-as.matrix(filtered %>% group_by(tg) %>% filter(abs(cor)==maxabs(cor)))
   rownames(winners)<-paste0(winners[,1],"_",winners[,2])
   occ<-cbind(filtered,rep(0,nrow(filtered)))
