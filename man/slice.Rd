@@ -10,7 +10,7 @@ slice(matrix)
 \item{matrix}{A matrix}
 }
 \value{
-prints it
+A visualization of the first 5 rows and columns of the input matrix
 }
 \description{
 This function prints a slice of a matrix

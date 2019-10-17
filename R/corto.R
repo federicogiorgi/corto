@@ -10,6 +10,7 @@
 #' @param nbootstraps Number of bootstraps to be performed. Default is 100
 #' @param p The p-value threshold for correlation significance (by default 1E-30)
 #' @param nthreads The number of threads to use for bootstrapping. Default is 1
+#' @param verbose Logical. Whether to print progress messages. Default is FALSE
 #' @return A list (object of class regulon), where each element is a centroid
 #' \itemize{
 #'   \item tfmode: a named vector containing correlation coefficients between
@@ -22,31 +23,40 @@
 #' # Load centroids
 #' load(system.file("extdata","centroids.rda",package="corto",mustWork=TRUE))
 #' # Run corto
-#' regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10)
+#' regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE)
 #' @export
-corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
+corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE){
   # Analytical inference of threshold
   ncol<-ncol(inmat)
   nrow<-nrow(inmat)
-  message("Input Matrix has ",ncol," samples and ",nrow," features")
+  if(verbose){
+    message("Input Matrix has ",ncol," samples and ",nrow," features")
+  }
   r<-p2r(p=p,n=ncol)
-  message("Correlation Coefficient Threshold is: ",r)
-
+  if(verbose){
+    message("Correlation Coefficient Threshold is: ",r)
+  }
   # Filtering zero variance
   allvars<-apply(inmat,1,var)
   keep<-names(allvars)[allvars>0]
   inmat<-inmat[keep,]
-  message("Removed ",nrow-length(keep)," features with zero variance")
+  if(verbose){
+    message("Removed ",nrow-length(keep)," features with zero variance")
+  }
   nrow<-nrow(inmat)
   centroids<-intersect(rownames(inmat),centroids)
   targets<-setdiff(rownames(inmat),centroids)
 
   # Calculating pairwise correlations
-  message("Calculating pairwise correlations")
+  if(verbose){
+    message("Calculating pairwise correlations")
+  }
   sigedges<-fcor(inmat,centroids,r)
 
   # Extract all triplets TF-TF-TG
-  message("Initial testing of triplets for DPI")
+  if(verbose){
+    message("Initial testing of triplets for DPI")
+  }
   # Remove edges which have no TF
   filtered<-sigedges[sigedges[,1]%in%centroids,]
   rm(sigedges)
@@ -55,12 +65,16 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   filtered[,3]<-as.numeric(as.character(filtered[,3]))
   rownames(filtered)<-paste0(filtered[,1],"_",filtered[,2])
   selected_edges<-rownames(filtered)
-  message(nrow(filtered)," edges passed the initial threshold")
+  if(verbose){
+    message(nrow(filtered)," edges passed the initial threshold")
+  }
   selected_nodes<-unique(c(filtered[,1],filtered[,2]))
   centroids<-intersect(centroids,selected_nodes)
   targets<-setdiff(selected_nodes,centroids)
-  message("Building DPI network from ",length(centroids)," centroids and ",
-          length(targets)," targets")
+  if(verbose){
+    message("Building DPI network from ",length(centroids)," centroids and ",
+            length(targets)," targets")
+  }
 
   # DPI: Test all edges triplets for winners
   # winners<-matrix(nrow=0,ncol=3)
@@ -80,10 +94,11 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   colnames(occ)[4]<-"occurrences"
 
   # Now run bootstraps to check the number of wins
-  message("Running ",nbootstraps," bootstraps with ",nthreads," thread(s)")
-
+  if(verbose){
+    message("Running ",nbootstraps," bootstraps with ",nthreads," thread(s)")
+  }
   # Run the bootstraps in multithreading
-  cl<-snow::makeCluster(nthreads)
+  cl<-snow::makeCluster(rep("localhost",nthreads),type="SOCK")
   registerDoSNOW(cl)
   pb<-txtProgressBar(0,nbootstraps,style=3)
   progress<-function(n){
@@ -93,7 +108,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   i<-0
   winnerlist<-foreach(i=1:nbootstraps,.combine=c,.options.snow=opts) %dopar% {
     s<-funboot(i,inmat=inmat,centroids=centroids,r=r,
-              selected_edges=selected_edges,targets=targets)
+               selected_edges=selected_edges,targets=targets)
     return(s)
   }
   close(pb)
@@ -104,12 +119,16 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1){
   occ[names(add),"occurrences"]<-occ[names(add),"occurrences"]+add
 
   # Likelihood based on bootstrap occurrence
-  message("Calculating edge likelihood")
+  if(verbose){
+    message("Calculating edge likelihood")
+  }
   occ$likelihood<-occ$occurrences/(nbootstraps+1)
   occ<-occ[occ$likelihood>0,]
 
   # Generate regulon object
-  message("Generating regulon object")
+  if(verbose){
+    message("Generating regulon object")
+  }
   regulon<-list()
   for(tf in unique(occ[,1])){
     targets<-occ[occ[,1]==tf,2]

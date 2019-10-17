@@ -215,6 +215,11 @@ plot_gsea <- function(gsea.obj, twoColors = c("red",
                       bottomTitle = "List Values",
                       bottomYlabel = "Signature values",
                       ext_nes = NULL, omit_middle = FALSE) {
+    # Keep original par device settings and layout
+    on.exit(layout(1))
+    opar<-par(no.readonly=TRUE)
+    on.exit(par(opar),add=TRUE,after=FALSE)
+
     # Extract parameters from the gsea object
     es <- gsea.obj$es
     nes <- gsea.obj$nes
@@ -259,20 +264,18 @@ plot_gsea <- function(gsea.obj, twoColors = c("red",
     ### destructive putting everything in a
     ### single window
     if (omit_middle) {
-        layoutMatrix <- rbind(1, 2)
-        layout(layoutMatrix, heights = c(1,
-                                         2))
+        layoutMatrix<-rbind(1,2)
+        layout(layoutMatrix, heights=c(1,2))
     } else {
-        layoutMatrix <- rbind(1, 2, 3)
-        layout(layoutMatrix, heights = c(1,
-                                         4, 2))
+        layoutMatrix<-rbind(1,2,3)
+        layout(layoutMatrix, heights = c(1,4,2))
     }
 
 
     # layout.show(n=3)
 
     ### PLOT 1: barcode-like enrichment tags
-    par(mar = c(0, 4.1, 2, 2.1))
+    par(mar=c(0,4.1,2,2.1))
     plot(0, col = "white", xlim = c(1, N),
          ylim = c(0, 10), xaxt = "n", yaxt = "n",
          type = "n", frame.plot = FALSE, xlab = "",
@@ -303,7 +306,7 @@ plot_gsea <- function(gsea.obj, twoColors = c("red",
 
     ### PLOT 2: The running sum plot
     if (!omit_middle) {
-        par(mar = c(2, 4.1, 2, 2.1))
+        par(mar=c(2.1,4.1,2,2.1))
         plot(ind, running_score, sub = "",
              xlab = "", ylab = "Enrichment Score",
              xlim = c(1, N), ylim = c(min.plot,
@@ -358,13 +361,12 @@ plot_gsea <- function(gsea.obj, twoColors = c("red",
     } else {
         bottomMain <- bottomTitle
     }
-
-    par(mar = c(2, 4.1, 2, 2.1))
+    par(mar=c(2.1,4.1,2,2.1))
     plot(ind, reflist, type = "l", pch = 20,
          lwd = 3, xlim = c(1, N), cex = 1,
          col = 1, xaxs = "r", yaxs = "r",
          main = bottomMain, ylab = bottomYlabel,
-         cex.axis = 0.8)
+         cex.axis = 0.8, xlab="")
     grid(col = "dark grey", lty = 2)
     # zero correlation horizontal line
     lines(c(1, N), c(corr0.line, corr0.line),
@@ -392,7 +394,6 @@ plot_gsea <- function(gsea.obj, twoColors = c("red",
                    bg = "white")
         }
     }
-
 }
 
 
@@ -547,7 +548,7 @@ fisherp <- function(ps) {
 #' This function prints a slice of a matrix
 #'
 #' @param matrix A matrix
-#' @return prints it
+#' @return A visualization of the first 5 rows and columns of the input matrix
 #' @examples
 #' set.seed(1)
 #' example<-matrix(rnorm(1000),nrow=100,ncol=10)
@@ -631,6 +632,12 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
                         title = "Running Enrichment Score",
                         bottomTitle = "List Values",
                         bottomYlabel = "Signature values") {
+    # Keep original par device settings and layout
+    on.exit(layout(1))
+    opar<-par(no.readonly=TRUE)
+    on.exit(par(opar),add=TRUE,after=FALSE)
+
+    # Extract parameters from the gsea object
     es1 <- gsea.obj$es1; es2 <- gsea.obj$es2;
     nes1 <- gsea.obj$nes1;nes2 <- gsea.obj$nes2;
     p.value1 <- gsea.obj$p.value1; p.value2 <- gsea.obj$p.value2;
@@ -655,13 +662,12 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
         l.ledge.ref.plot2 <- length(ledge2)
     }
 
-    N <- length(reflist)
-    ind <- 1:N
-
-    layoutMatrix <- rbind(1, 2, 3, 4)
-    layout(layoutMatrix, heights = c(1, 5, 1, 2))
+    N<-length(reflist)
+    ind<- 1:N
+    layoutMatrix<-rbind(1,2,3,4)
+    layout(layoutMatrix,heights=c(1,5,1,2))
     ##-----------------------------------------
-    par(mar = c(0, 4.1, 2, 2.1))
+    par(mar=c(0,4.1,2,2.1))
     plot(0, col = "white", xlim = c(1, N), ylim = c(0, 10), xaxt = "n",
          yaxt = "n", type = "n", frame.plot = FALSE, xlab = "",
          ylab = "", xaxs = "r", yaxs = "r", main = paste("Number of elements: ",
@@ -684,7 +690,6 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
         }
     }
     ##--------------------------------
-    par(mar = c(0, 4.1, 2, 2.1))
     plot(x=NULL,y=NULL,xlim=range(c(1,N)), ylim=range(c(min.plot, max.plot)), sub = "", xlab = "", ylab = "Running Enrichment Score",
          pch = 20, lwd = 2, cex = 1, xaxt = "n",
          yaxs = "r", main = title)
@@ -713,7 +718,6 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
     legend("center",legend=paste0("pFisher = ",sprintf("%.2e",p.value.int)),cex=1.5)
 
     ##----------------------------------
-    par(mar = c(0, 4.1, 2, 2.1))
     plot(0, col = "white", xlim = c(1, N), ylim = c(0, 10), xaxt = "n",
          yaxt = "n", type = "n", frame.plot = FALSE, xlab = "",
          ylab = "", xaxs = "r", yaxs = "r", main = paste("Number of elements: ",
@@ -737,11 +741,11 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
     }
 
     #-----------------------------------
-    par(mar = c(2, 4.1, 2, 2.1))
+    par(mar=c(2.1,4.1,2,2.1))
     plot(x=NULL,y=NULL,xlim=range(c(0,N)),
          ylim=range(c(min(reflist),max(reflist))), type = "b", lwd = 2,
          cex = 1, col = 1, xaxs = "r", yaxs = "r",main=bottomTitle,
-         ylab=bottomYlabel)
+         ylab=bottomYlabel,xlab="")
     grid(col = "light grey", lty = 2)
     abline(h=0, lwd = 1,lty = 1, cex = 1, col = 1)
     lines(ind,reflist,lty=1,lwd=2)
