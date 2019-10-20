@@ -7,11 +7,12 @@ The _corto_ ("correlation tool") package provides a pipeline to infer networks b
 
 In brief, _corto_ operates using the following steps:
 
-1. Calculate all pairwise Spearman correlation coefficients between centroid and target features. The rank transformation operated by the Spearman correlation coefficient is a common procedure used in co-expression based studies, due to its benefits in reducing the effects of outliers [10].
-2. Filter out all centroid-target features whose correlation coefficient _absolute value_ is below the provided p-value threshold _p_.
-3. Apply DPI to all centroid-centroid-target triplets, in order to identify which centroid-target correlation is stronger and identify the most likely association (e.g. which TF is the most likely regulator of the TG in the dataset).
-4. All edges are tested for Data Processing Inequality in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [8]). This step can be run in parallel by specifiying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
-5. A network is generated in the form of a list, where each element is a centroid-based list of targets. In order to follow the structure of the _regulon_ class implemented by downstream analysis packages (e.g. VIPER [11]), each target is characterized by two parameters:
+1. Load an gene expression matrix and a list of user-provided centroids (e.g. TFs). In the case of RNA-Seq, VST-normalized data, as described in [10].
+2. Calculate all pairwise Spearman correlation coefficients between centroid and target features. The rank transformation operated by the Spearman correlation coefficient is a common procedure used in co-expression based studies, due to its benefits in reducing the effects of outliers [11].
+3. Filter out all centroid-target features whose correlation coefficient _absolute value_ is below the provided p-value threshold _p_.
+4. Apply DPI to all centroid-centroid-target triplets, in order to identify which centroid-target correlation is stronger and identify the most likely association (e.g. which TF is the most likely regulator of the TG in the dataset).
+5. All edges are tested for Data Processing Inequality in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [8]). This step can be run in parallel by specifiying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
+6. A network is generated in the form of a list, where each element is a centroid-based list of targets. In order to follow the structure of the _regulon_ class implemented by downstream analysis packages (e.g. VIPER [12]), each target is characterized by two parameters:
     + The _tfmode_, the mode of action, i.e. the Spearman correlation coefficient between the target and the centroid in the original input matrix
     + The _likelihood_ of the interaction, calculated as the number of bootstraps in which the edge survives DPI, divided by the total number of bootstraps (in this impelmentation, the presence of an edge in the original, non-bootstrapped matrix is considered as an additional evidence)
 
@@ -27,7 +28,7 @@ Then, load it:
 library(corto)
 ```
 
-Then, you can see how the input matrix looks like. For example, this dataset comes from the TCGA mesothelioma project [12] and measures the expression of 10021 genes across 87 samples:
+Then, you can see how the input matrix looks like. For example, this dataset comes from the TCGA mesothelioma project [13] and measures the expression of 10021 genes across 87 samples:
 ```{r load1}
 load(system.file("extdata","inmat.rda",package="corto"))
 inmat[1:5,1:5]
@@ -35,7 +36,7 @@ inmat[1:5,1:5]
 ```{r load2}
 dim(inmat)
 ```
-Another input needed by _corto_ is a list of centroid features. In our case, we can specify a list of TFs generated from Gene Ontology with the term "Regulation of Transcription" [13].
+Another input needed by _corto_ is a list of centroid features. In our case, we can specify a list of TFs generated from Gene Ontology with the term "Regulation of Transcription" [14].
 
 ```{r load3}
 load(system.file("extdata","centroids.rda",package="corto"))
@@ -69,3 +70,46 @@ The regulon in this dataset is composed of 34 final centroids with at least one 
 ```{r prinregulon2}
 length(regulon)
 ```
+```{r prinregulon3}
+names(regulon)
+```
+
+# Correcting with CNV data
+As an additional, optional feature, __corto__ gives the user the possibility to provide Copy Number Variation (CNV) data, if available, which can generate spurious correlations between TFs and targets [15]. The gene expression profiles for the target genes are corrected via linear regression and the residuals of the expression~cnv model substitute the original gene expression profile.
+
+In this example, a CNV matrix is provided. The analysis will be run only for the features (rows) and samples (columns) present in both matrices
+```{r runcnv}
+load(system.file("extdata","cnvmat.rda",package="corto",mustWork=TRUE))
+regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE,cnvmat=cnvmat,p=0.05)
+```
+
+# References
+[1] Reverter, Antonio, and Eva KF Chan. "Combining partial correlation and an information theory approach to the reversed engineering of gene co-expression networks." Bioinformatics 24.21 (2008): 2491-2497.
+
+[2] D’Haeseleer, Patrik, Shoudan Liang, and Roland Somogyi. "Genetic network inference: from co-expression clustering to reverse engineering." Bioinformatics 16.8 (2000): 707-726.
+
+[3] Hansen, Bjoern O., et al. "Elucidating gene function and function evolution through comparison of co-expression networks of plants." Frontiers in plant science 5 (2014): 394.
+
+[4] Basso, Katia, et al. "Reverse engineering of regulatory networks in human B cells." Nature genetics 37.4 (2005): 382.
+[5] Amar, David, Hershel Safer, and Ron Shamir. "Dissection of regulatory networks that are altered in disease via differential co-expression." PLoS computational biology 9.3 (2013): e1002955.
+
+[6] Vandepoele, Klaas, et al. "Unraveling transcriptional control in Arabidopsis using cis-regulatory elements and coexpression networks." Plant physiology 150.2 (2009): 535-546.
+
+[7] Margolin, Adam A., et al. "ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context." BMC bioinformatics. Vol. 7. No. 1. BioMed Central, 2006.
+
+[8] Lachmann, Alexander, et al. "ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information." Bioinformatics 32.14 (2016): 2233-2235.
+
+[9] Khatamian, Alireza, et al. "SJARACNe: a scalable software tool for gene network reverse engineering from big data." Bioinformatics 35.12 (2018): 2165-2166.
+
+[10] Giorgi, Federico M., et al. "Comparative study of RNA-seq-and microarray-derived coexpression networks in Arabidopsis thaliana." Bioinformatics 29.6 (2013): 717-724.
+
+[11] Usadel, Björn, et al. "Co‐expression tools for plant biology: opportunities for hypothesis generation and caveats." Plant, cell & environment 32.12 (2009): 1633-1651.
+
+[12] Alvarez, Mariano J., Federico Giorgi, and Andrea Califano. "Using viper, a package for Virtual Inference of Protein-activity by Enriched Regulon analysis." Bioconductor (2014): 1-14.
+
+[13] Ladanyi, Marc, et al. "The TCGA malignant pleural mesothelioma (MPM) project: VISTA expression and delineation of a novel clinical-molecular subtype of MPM." (2018): 8516-8516.
+
+[14] Gene Ontology Consortium. "The Gene Ontology (GO) database and informatics resource." Nucleic acids research 32.suppl_1 (2004): D258-D261.
+
+[15] Schubert, Michael, et al. "Gene networks in cancer are biased by aneuploidies and sample impurities." BioRxiv (2019): 752816.
+

@@ -1,7 +1,7 @@
 Package: corto
 Type: Package
 Title: Inference of Gene Regulatory Networks
-Version: 0.99.6
+Version: 0.99.7
 Authors@R: c(
  person("Federico M.","Giorgi",email = "federico.giorgi@gmail.com",role=c("aut","cre")),
  person("Daniele","Mercatelli",email = "danielemercatelli@gmail.com",role="ctb"),

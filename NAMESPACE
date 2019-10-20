@@ -14,7 +14,7 @@ export(slice)
 export(stouffer)
 export(wstouffer)
 export(z2p)
-importFrom("stats", "cor", "pt", "qt", "setNames", "var",
+importFrom("stats", "cor", "pt", "qt", "setNames", "var", "lm",
     "pchisq","ks.test", "pnorm", "qnorm", "quantile")
 importFrom("utils", "setTxtProgressBar", "txtProgressBar")
 import("pbapply")

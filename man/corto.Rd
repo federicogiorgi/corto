@@ -5,7 +5,7 @@
 \title{Calculate a regulon from a data matrix}
 \usage{
 corto(inmat, centroids, nbootstraps = 100, p = 1e-30, nthreads = 1,
-  verbose = FALSE)
+  verbose = FALSE, cnvmat = NULL)
 }
 \arguments{
 \item{inmat}{Input matrix, with features (e.g. genes) as rows and samples
@@ -21,6 +21,11 @@ to consider as centroids (a.k.a. Master Regulators) for DPI}
 \item{nthreads}{The number of threads to use for bootstrapping. Default is 1}
 
 \item{verbose}{Logical. Whether to print progress messages. Default is FALSE}
+
+\item{cnvmat}{An optional matrix with copy-number variation data. If specified, the program
+will calculate linear regression between the gene expression data in the input matrix (exp)
+and the cnv data, and target profiles will be transformed to the residuals
+of each linear model exp~cnv. Default is NULL}
 }
 \value{
 A list (object of class regulon), where each element is a centroid
@@ -41,4 +46,10 @@ load(system.file("extdata","inmat.rda",package="corto",mustWork=TRUE))
 load(system.file("extdata","centroids.rda",package="corto",mustWork=TRUE))
 # Run corto
 regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE)
+
+# In a second example, a CNV matrix is provided. The analysis will be run only
+# for the features (rows) and samples (columns) present in both matrices
+load(system.file("extdata","cnvmat.rda",package="corto",mustWork=TRUE))
+regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE,cnvmat=cnvmat,
+p=0.05)
 }

@@ -24,7 +24,7 @@ library(devtools)
 unlink("NAMESPACE")
 document()
 # use_vignette("corto_vignette")
-cat('importFrom("stats", "cor", "pt", "qt", "setNames", "var",
+cat('importFrom("stats", "cor", "pt", "qt", "setNames", "var", "lm",
     "pchisq","ks.test", "pnorm", "qnorm", "quantile")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("utils", "setTxtProgressBar", "txtProgressBar")\n',file="NAMESPACE",append=TRUE)
 cat('import("pbapply")\n',file="NAMESPACE",append=TRUE)
