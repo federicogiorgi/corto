@@ -3,7 +3,7 @@ title: "A short introduction to the _corto_ Package"
 author: | 
   | Federico M. Giorgi
   | Department of Pharmacy and Biotechnology, University of Bologna
-date: "10 October 2019"
+date: "20 October 2019"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{corto_vignette}
