@@ -1,2 +1,3 @@
-^.*\.Rproj$
+^inst/scripts/howto\.R$
+^corto\.Rproj$
 ^\.Rproj\.user$

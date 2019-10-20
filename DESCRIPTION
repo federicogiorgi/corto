@@ -1,14 +1,14 @@
 Package: corto
 Type: Package
-Title: Inference of Co-Occurrence Networks
-Version: 0.99.5
+Title: Inference of Gene Regulatory Networks
+Version: 0.99.6
 Authors@R: c(
  person("Federico M.","Giorgi",email = "federico.giorgi@gmail.com",role=c("aut","cre")),
  person("Daniele","Mercatelli",email = "danielemercatelli@gmail.com",role="ctb"),
  person("Gonzalo","Lopez-Garcia",email = "gonzolgarcia@gmail.com",role="ctb"))
 Maintainer: Federico M. Giorgi <federico.giorgi@gmail.com>
 Description: We present 'corto' (Correlation Tool), a simple package to infer
- correlation networks using DPI (Data Processing Inequality) and bootstrapping
+ gene regulatory networks using DPI (Data Processing Inequality) and bootstrapping
  to recover edges. An initial step is performed to calculate all significant
  edges between a list of source nodes (centroids) and target genes.
  Then all triplets containing two centroids and one target are tested
@@ -16,10 +16,9 @@ Description: We present 'corto' (Correlation Tool), a simple package to infer
  process then calculates the robustness of the network, eventually re-adding
  edges previously removed by DPI. The package implements a similar pipeline as
  ARACNe-AP (Algorithm for the Reconstruction of Accurate Cellular Networks with
- Adaptive Partitioning) by Lachmann, Giorgi, Lopez-Garcia and Califano (2016)
- <doi:10.1093/bioinformatics/btw216>) with optimizations to run outside a
- computing cluster (most notably correlation to infer feature dependencies
- instead of Mutual Information).
+ Adaptive Partitioning) by Giorgi (2016) <doi:10.1093/bioinformatics/btw216>)
+ with optimizations to run outside a  computing cluster (most notably
+ correlation to infer feature dependencies instead of Mutual Information).
 License: LGPL-3
 Encoding: UTF-8
 LazyData: TRUE
@@ -27,12 +26,11 @@ RoxygenNote: 6.1.1
 Depends: R (>= 3.5)
 NeedsCompilation: no
 Imports:
- stats,
- utils,
- doSNOW,
- snow,
- foreach,
  dplyr,
  knitr,
- rmarkdown
+ parallel,
+ pbapply,
+ rmarkdown,
+ stats,
+ utils
 VignetteBuilder: knitr

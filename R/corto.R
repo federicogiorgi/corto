@@ -97,22 +97,81 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
   if(verbose){
     message("Running ",nbootstraps," bootstraps with ",nthreads," thread(s)")
   }
-  # Run the bootstraps in multithreading
-  cl<-snow::makeCluster(rep("localhost",nthreads),type="SOCK")
-  registerDoSNOW(cl)
-  pb<-txtProgressBar(0,nbootstraps,style=3)
-  progress<-function(n){
-    setTxtProgressBar(pb,n)
+
+
+  ## Run the bootstraps in multithreading
+  # Functions required by the bootstrap jobs
+  if(TRUE){
+    # Function to calculate DPI
+    funboot<-function(seed=0,inmat,centroids,r,selected_edges,targets){
+      bootsigedges<-bootmat(inmat,centroids,r,seed=seed)
+      # Get surviving edges
+      filtered<-bootsigedges[bootsigedges[,1]%in%centroids,]
+      rm(bootsigedges)
+      filtered[,1]<-as.character(filtered[,1])
+      filtered[,2]<-as.character(filtered[,2])
+      filtered[,3]<-as.numeric(as.character(filtered[,3]))
+      rownames(filtered)<-paste0(filtered[,1],"_",filtered[,2])
+      filtered<-filtered[intersect(rownames(filtered),selected_edges),]
+      # Test all edges triplets for winners
+      colnames(filtered)<-c("centroid","tg","cor")
+      tg<-filtered[,"tg"]
+      winners<-as.matrix(filtered %>% group_by(tg) %>% filter(abs(cor)==maxabs(cor)))
+      rownames(winners)<-paste0(winners[,1],"_",winners[,2])
+      # Return surviving edges in bootstrap
+      return(rownames(winners))
+    }
+    # Function to bootstrap Matrix
+    bootmat<-function(inmat,centroids,r,seed=NULL){
+      set.seed(seed)
+      bootmat<-inmat[,sample(colnames(inmat),replace=TRUE)]
+      # Calculate correlations in the bootstrapped matrix
+      options(warn=-1)
+      bootsigedges<-fcor(bootmat,centroids,r)
+      options(warn=0)
+      return(bootsigedges)
+    }
+    # Function to calculate correlation in bootstraps
+    fcor<-function(inmat,centroids,r){
+      tmat<-t(inmat)
+      nfeatures<-ncol(tmat)
+      features<-colnames(tmat)
+      targets<-setdiff(features,centroids)
+
+      # Calculate centroid x target correlations
+      cenmat<-tmat[,centroids]
+      tarmat<-tmat[,targets]
+      cormat<-cor(cenmat,tarmat)
+
+      # Extract significant correlations
+      hits<-which(abs(cormat)>=r,arr.ind=TRUE)
+      rowhits<-rownames(cormat)[hits[,1]]
+      colhits<-colnames(cormat)[hits[,2]]
+
+      # Extract correlation indeces
+      corhits<-cormat[hits[,1]+nrow(cormat)*(hits[,2]-1)]
+
+      # Results
+      sigedges<-as.data.frame(cbind(rowhits,colhits,corhits))
+
+      return(sigedges)
+    }
+    # Max of absolute value
+    maxabs<-function(x){
+      max(abs(x))
+    }
   }
-  opts<-list(progress=progress)
-  i<-0
-  winnerlist<-foreach(i=1:nbootstraps,.combine=c,.options.snow=opts) %dopar% {
-    s<-funboot(i,inmat=inmat,centroids=centroids,r=r,
-               selected_edges=selected_edges,targets=targets)
-    return(s)
-  }
-  close(pb)
-  stopCluster(cl)
+
+  # The pbapply snippet
+  cl<-parallel::makeCluster(nthreads)
+  #invisible(parallel::clusterExport(cl=cl,varlist=c("nthreads")))
+  invisible(parallel::clusterEvalQ(cl= cl,library(dplyr)))
+  winnerlist<-unlist(pblapply(cl=cl,
+                   X=1:nbootstraps,
+                   FUN=funboot,
+                   inmat=inmat,centroids=centroids,r=r,selected_edges=selected_edges,targets=targets
+                   ))
+  parallel::stopCluster(cl)
 
   # Add occurrences
   add<-table(winnerlist)

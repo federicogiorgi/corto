@@ -23,16 +23,16 @@
 library(devtools)
 unlink("NAMESPACE")
 document()
-#use_vignette("corto_vignette")
+# use_vignette("corto_vignette")
 cat('importFrom("stats", "cor", "pt", "qt", "setNames", "var",
     "pchisq","ks.test", "pnorm", "qnorm", "quantile")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("utils", "setTxtProgressBar", "txtProgressBar")\n',file="NAMESPACE",append=TRUE)
-cat('import("doSNOW")\n',file="NAMESPACE",append=TRUE)
-cat('import("snow")\n',file="NAMESPACE",append=TRUE)
-cat('import("foreach")\n',file="NAMESPACE",append=TRUE)
+cat('import("pbapply")\n',file="NAMESPACE",append=TRUE)
+cat('import("parallel")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("dplyr", "%>%", "filter", "group_by")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("graphics", "abline", "grid", "layout", "legend", "lines",
            "par", "plot", "rect", "text")\n',file="NAMESPACE",append=TRUE)
+usethis::use_build_ignore(c("inst/scripts/howto.R","corto.Rproj",".Rproj.user"))
 build()
 check(document=FALSE,args = c('--as-cran'))
 
