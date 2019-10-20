@@ -95,7 +95,7 @@ As an additional, optional feature, __corto__ gives the user the possibility to 
 In this example, a CNV matrix is provided. The analysis will be run only for the features (rows) and samples (columns) present in both matrices
 ```{r runcnv, eval=FALSE}
 load(system.file("extdata","cnvmat.rda",package="corto",mustWork=TRUE))
-regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE,cnvmat=cnvmat,p=0.05)
+regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE,cnvmat=cnvmat,p=0.01)
 ```
 
 # References

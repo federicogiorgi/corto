@@ -33,7 +33,7 @@
 #' # for the features (rows) and samples (columns) present in both matrices
 #' load(system.file("extdata","cnvmat.rda",package="corto",mustWork=TRUE))
 #' regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE,cnvmat=cnvmat,
-#' p=0.05)
+#' p=0.01)
 #' @export
 corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE,cnvmat=NULL){
   if(sum(is.na(inmat))>0){

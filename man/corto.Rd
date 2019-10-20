@@ -51,5 +51,5 @@ regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRU
 # for the features (rows) and samples (columns) present in both matrices
 load(system.file("extdata","cnvmat.rda",package="corto",mustWork=TRUE))
 regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE,cnvmat=cnvmat,
-p=0.05)
+p=0.01)
 }
