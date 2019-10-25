@@ -7,7 +7,7 @@ The _corto_ ("correlation tool") package provides a pipeline to infer networks b
 
 In brief, _corto_ operates using the following steps:
 
-1. Load an gene expression matrix and a list of user-provided centroids (e.g. TFs). In the case of RNA-Seq, VST-normalized data, as described in [10].
+1. Load a gene expression matrix and a list of user-provided centroids (e.g. TFs). In the case of RNA-Seq, VST-normalized data, as described in [10].
 2. Calculate all pairwise Spearman correlation coefficients between centroid and target features. The rank transformation operated by the Spearman correlation coefficient is a common procedure used in co-expression based studies, due to its benefits in reducing the effects of outliers [11].
 3. Filter out all centroid-target features whose correlation coefficient _absolute value_ is below the provided p-value threshold _p_.
 4. Apply DPI to all centroid-centroid-target triplets, in order to identify which centroid-target correlation is stronger and identify the most likely association (e.g. which TF is the most likely regulator of the TG in the dataset).
