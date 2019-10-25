@@ -32,8 +32,8 @@
 #' # In a second example, a CNV matrix is provided. The analysis will be run only
 #' # for the features (rows) and samples (columns) present in both matrices
 #' load(system.file("extdata","cnvmat.rda",package="corto",mustWork=TRUE))
-#' regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE,cnvmat=cnvmat,
-#' p=0.01)
+#' regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=6,verbose=TRUE,cnvmat=cnvmat,
+#' p=1e-8)
 #' @export
 corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE,cnvmat=NULL){
   if(sum(is.na(inmat))>0){
@@ -173,9 +173,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     set.seed(seed)
     bootmat<-inmat[,sample(colnames(inmat),replace=TRUE)]
     # Calculate correlations in the bootstrapped matrix
-    options(warn=-1)
     bootsigedges<-fcor(bootmat,centroids,r)
-    options(warn=0)
     return(bootsigedges)
   }
   # Function to calculate correlation in bootstraps
