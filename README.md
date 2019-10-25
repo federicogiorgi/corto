@@ -111,5 +111,5 @@ regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRU
 
 [14] Gene Ontology Consortium. "The Gene Ontology (GO) database and informatics resource." Nucleic acids research 32.suppl_1 (2004): D258-D261.
 
-[15] Schubert, Michael, et al. "Gene networks in cancer are biased by aneuploidies and sample impurities." BioRxiv (2019): 752816.
+[15] Schubert, Michael, et al. "Gene networks in cancer are biased by aneuploidies and sample impurities." Biochimica et Biophisica Acata - Gene Regulatory Models (2019): 194444. DOI: https://doi.org/10.1016/j.bbagrm.2019.194444
 
