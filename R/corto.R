@@ -42,6 +42,9 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
   if(sum(is.na(rownames(inmat)))>0){
     stop("Row names of inmat contain NA values")
   }
+  if(any(abs(inmat)==Inf)){
+    stop("Input matrix contains Inf fields")
+  }
   # Initial check for the presence of CNV data
   if(!is.null(cnvmat)){
     if(verbose){
