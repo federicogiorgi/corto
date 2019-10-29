@@ -1,12 +1,13 @@
 # corto
 _corto_ (Correlation Tool): an R package to generate correlation-based DPI networks
-![alt text](https://giorgilaborg.files.wordpress.com/2019/10/cortoicon.png)
-
 To install _corto_ in 3.5 or later:
 ```{r}
 library(devtools)
 install_github("federicogiorgi/corto")
 ```
+
+![corto logo correlation tool](https://giorgilaborg.files.wordpress.com/2019/10/cortoicon.png)
+
 
 # Introduction
 The _corto_ ("correlation tool") package provides a pipeline to infer networks between "centroid" and "target" variables in a dataset, using a combination of Spearman correlation and Data Processing Inequality (DPI), first proposed in [1]. The main application of _corto_ is in the field of Bioinformatics and Transcriptomics, where co-occurrence between variables can be used as a mean to infer regulatory mechanisms [2] or gene functions [3]. In this field, usually the tested features are genes (or rather, their expression profile across samples), whereas the centroids are Transcription Factors (TFs) and their targets are Target Genes (TGs). The TF-TG co-expression can hint at a causal regulatory relationship, as proven in many studies [4,5,6]. The _corto_ tool replicates the well-established pipeline of the ARACNe family of tools [7,8,9]
