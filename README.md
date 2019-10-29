@@ -1,5 +1,6 @@
 # corto
-_corto_ (Correlation Tool): an R package to generate correlation-based DPI networks
+_corto_ (Correlation Tool): an R package to generate correlation-based DPI networks.
+
 To install _corto_ in 3.5 or later:
 ```{r}
 library(devtools)
