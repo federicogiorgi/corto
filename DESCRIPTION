@@ -8,8 +8,8 @@ Authors@R: c(
  person("Gonzalo","Lopez-Garcia",email = "gonzolgarcia@gmail.com",role="ctb"))
 Maintainer: Federico M. Giorgi <federico.giorgi@gmail.com>
 Description: We present 'corto' (Correlation Tool), a simple package to infer
- gene regulatory networks using DPI (Data Processing Inequality) and bootstrapping
- to recover edges. An initial step is performed to calculate all significant
+ gene regulatory networks from gene expression data using DPI (Data Processing Inequality)
+ and bootstrapping to recover edges. An initial step is performed to calculate all significant
  edges between a list of source nodes (centroids) and target genes.
  Then all triplets containing two centroids and one target are tested
  in a DPI step which removes edges. A bootstrapping
