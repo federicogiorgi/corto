@@ -2,9 +2,7 @@
 % Please edit documentation in R/mra.R
 \name{mra}
 \alias{mra}
-\title{Perform Master Regulator Analysis (mra).
-The analysis is performed between two groups of samples in the form of expression matrices,
-with genes/features as rows and samples as columns.}
+\title{Perform Master Regulator Analysis (mra).}
 \usage{
 mra(expmat1, expmat2 = NULL, regulon, minsize = 10, nperm = 100,
   nthreads = 2, verbose = FALSE, atacseq = NULL)
@@ -48,7 +46,6 @@ rather than distal effects.
 }
 }
 \description{
-Perform Master Regulator Analysis (mra).
 The analysis is performed between two groups of samples in the form of expression matrices,
 with genes/features as rows and samples as columns.
 }

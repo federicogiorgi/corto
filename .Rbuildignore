@@ -1,3 +1,4 @@
 ^inst/scripts/howto\.R$
 ^corto\.Rproj$
 ^\.Rproj\.user$
+^R/deleteme\.R$

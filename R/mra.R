@@ -65,6 +65,10 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbo
     netmat<-netmat2
     rm(netmat2)
 
+    # Then we normalize by regulon length, otherwise TFs with small networks will be penalized
+    netmat<-t(apply(netmat,1,function(x){10*x/sum(abs(x))}))
+    netmat[is.na(netmat)]<-0
+
     # Calculate unnormalized scores
     scores<-(netmat%*%sig)[,1]
 
@@ -126,8 +130,199 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbo
 #' @param mrs Either a numeric value indicating how many MRs to show, sorted by
 #' significance, or a character vector specifying which TFs to show
 #' @return A plot is generated
-mraplot<-function(mraobj){
+#' @export
+mraplot<-function(mraobj,mrs=NULL){
+    # Checks ----
+    if(is.numeric(mrs)){
+        mrs<-names(sort(abs(mraobj$nes),decreasing=TRUE))[1:mrs]
+    } else if(is.character(mrs)){
+        mrs<-mrs
+    } else {
+        stop("Provide mrs as a number to show top mrs, or a vector of mrs")
+    }
 
+    # Define layout ----
+    ltitle<-c(1,1,1,2,2)
+    lblocks<-matrix(NA,nrow=0,ncol=length(ltitle))
+    for(i in 1:length(mrs)){
+        base<-3+(6*(i-1))
+        lblock<-rbind(
+            c(base,base+1,base+2,base+3,base+3),
+            c(base+4,base+4,base+4,base+3,base+3),
+            c(base+5,base+5,base+5,base+3,base+3)
+        )
+        lblocks<-rbind(lblocks,lblock)
+    }
+    lmatrix<-rbind(
+        ltitle,
+        lblocks
+    )
+
+    # Start plotting ----
+    layout(lmatrix,heights=c(1,rep(2,nrow(lmatrix)-1)))
+    # layout.show(n=max(lmatrix))
+
+    # Function for plotting text only ----
+    titplot<-function(title,box=TRUE,cex=2,bgcol="white",bold=FALSE){
+        if(bold){font<-2}else{font<-1}
+        opar<-par()$mar
+        par(mar = c(0.1,0.1,0.1,0.1))
+        plot(c(0,1),c(0,1),ann=F,bty='n',type='n',xaxt='n',yaxt='n')
+        rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],col=bgcol)
+        text(x=0.5,y=0.5,title, cex = cex, col = "black",font=font)
+        # if(bottom){
+        #     axis(1,lwd=10,tick=FALSE,labels=FALSE)
+        # }
+        if(box){
+            box()
+        }
+        par(mar=opar)
+    }
+    # Panels 1 and 2 are titles ----
+    titplot("corto - Master Regulator Analysis")
+    titplot("Top targets")
+
+    # Prefetch signature ----
+    ranksig<-rank(mraobj$sig)
+    ranksigabs<-rank(abs(mraobj$sig))
+
+    # Define Transparency for barcode plot coloring ----
+    transp<-255*(ranksigabs^3)/(length(ranksigabs)^3)
+    transp<-as.hexmode(round(transp))
+    names(transp)<-names(ranksig)
+
+    # Fille the plot with MR blocks ----
+    for(mr in mrs){
+        # Name of the MR
+        titplot(mr,cex=4)
+
+        ### NES ----
+        bgcol<-"white"
+        if(mraobj$nes[mr]>0&mraobj$pvalue[mr]<=0.01){
+            bgcol<-"salmon"
+        } else if(mraobj$nes[mr]<0&mraobj$pvalue[mr]<=0.01){
+            bgcol<-"cornflowerblue"
+        }
+        titplot(paste0("NES=",round(mraobj$nes[mr],2)),bgcol=bgcol)
+        ### p-value ----
+        bold<-FALSE
+        if(mraobj$pvalue[mr]<=0.01){bold<-TRUE}
+        titplot(paste0("p=",signif(mraobj$pvalue[mr],3)),bold=bold)
+
+        ### Network ----
+        # We show maybe the top 12 targets
+        # titplot("Network goes here")
+        opar<-par()$mar
+        par(mar=c(0,0,0,0),xaxs="i")
+        plot(0,xlim=c(-1.5,1.5),ylim=c(-1.5,1.5),type="n",ann=F,bty='n',xaxt='n',yaxt='n')
+
+        # Which targets to show
+        targets<-names(mraobj$regulon[[mr]]$tfmode)
+        targets<-intersect(targets,names(ranksig))
+        toshow<-names(sort(ranksigabs[targets],decreasing=TRUE)[1:12])
+
+        # Colors
+        col<-rep("white",12)
+        col[mraobj$sig[toshow]<0]<-"#6495ED66" # cornflowerblue
+        col[mraobj$sig[toshow]>0]<-"#FF8C6966" # salmon
+
+        # Type of regulation (mode of action)
+        moa<-rep("unknown",12)
+        tfmodehere<-mraobj$regulon[[mr]]$tfmode[toshow]
+        moa[tfmodehere>0]<-"activation"
+        moa[tfmodehere<0]<-"repression"
+        angle<-moa
+        angle[moa=="activation"]<-30
+        angle[moa=="repression"]<-90
+        angle[moa=="unknown"]<-0
+
+        # Circles Clock
+        draw.circle(0,1,0.1,border="gray90",col=col[1])
+        arrows(0,0.1,0,0.9,lwd=2,col="gray50",angle=angle[1])
+        text(0,1,font=2,cex=1.5,labels=toshow[1])
+
+        draw.circle(sin(pi/6),cos(pi/6),0.1,border="gray90",col=col[2])
+        arrows(0,0.1,sin(pi/6)-0.1,cos(pi/6)-0.1,lwd=2,col="gray50",angle=angle[2])
+        text(sin(pi/6),cos(pi/6),font=2,cex=1.5,labels=toshow[2])
+
+        draw.circle(sin(pi/3),cos(pi/3),0.1,border="gray90",col=col[3])
+        arrows(0,0.1,sin(pi/3)-0.2,cos(pi/3)-0.1,lwd=2,col="gray50",angle=angle[3])
+        text(sin(pi/3),cos(pi/3),font=2,cex=1.5,labels=toshow[3])
+
+        draw.circle(1,0,0.1,border="gray90",col=col[4])
+        arrows(0.1,0,0.7,0,lwd=2,col="gray50",angle=angle[4])
+        text(1,0,font=2,cex=1.5,labels=toshow[4])
+
+        draw.circle(sin(pi/3),-cos(pi/3),0.1,border="gray90",col=col[5])
+        arrows(0,-0.1,sin(pi/3)-0.2,-cos(pi/3)+0.1,lwd=2,col="gray50",angle=angle[5])
+        text(sin(pi/3),-cos(pi/3),font=2,cex=1.5,labels=toshow[5])
+
+        draw.circle(sin(pi/6),-cos(pi/6),0.1,border="gray90",col=col[6])
+        arrows(0,-0.1,sin(pi/6)-0.1,-cos(pi/6)+0.1,lwd=2,col="gray50",angle=angle[6])
+        text(sin(pi/6),-cos(pi/6),font=2,cex=1.5,labels=toshow[6])
+
+        draw.circle(0,-1,0.1,border="gray90",col=col[7])
+        arrows(0,-0.1,0,-0.9,lwd=2,col="gray50",angle=angle[7])
+        text(0,-1,font=2,cex=1.5,labels=toshow[7])
+
+        draw.circle(-sin(pi/6),-cos(pi/6),0.1,border="gray90",col=col[8])
+        arrows(0,-0.1,-sin(pi/6)+0.1,-cos(pi/6)+0.1,lwd=2,col="gray50",angle=angle[8])
+        text(-sin(pi/6),-cos(pi/6),font=2,cex=1.5,labels=toshow[8])
+
+        draw.circle(-sin(pi/3),-cos(pi/3),0.1,border="gray90",col=col[9])
+        arrows(0,-0.1,-sin(pi/3)+0.2,-cos(pi/3)+0.1,lwd=2,col="gray50",angle=angle[9])
+        text(-sin(pi/3),-cos(pi/3),font=2,cex=1.5,labels=toshow[9])
+
+        draw.circle(-1,0,0.1,border="gray90",col=col[10])
+        arrows(-0.1,0,-0.7,0,lwd=2,col="gray50",angle=angle[10])
+        text(-1,0,font=2,cex=1.5,labels=toshow[10])
+
+        draw.circle(-sin(pi/3),cos(pi/3),0.1,border="gray90",col=col[11])
+        arrows(0,0.1,-sin(pi/3)+0.1,cos(pi/3)-0.1,lwd=2,col="gray50",angle=angle[11])
+        text(-sin(pi/3),cos(pi/3),font=2,cex=1.5,labels=toshow[11])
+
+        draw.circle(-sin(pi/6),cos(pi/6),0.1,border="gray90",col=col[12])
+        arrows(0,0.1,-sin(pi/6)+0.2,cos(pi/6)-0.1,lwd=2,col="gray50",angle=angle[12])
+        text(-sin(pi/6),cos(pi/6),font=2,cex=1.5,labels=toshow[12])
+
+
+        # Plot Centroid
+        draw.circle(0,0,0.1,border="gray90",col="#00000011")
+        text(0,0,labels=mr,cex=2,font=2)
+
+        box()
+        par(mar=opar)
+
+        ### Signature ----
+        opar<-par()$mar
+        par(mar=c(0,0,0,0),xaxs="i")
+        plot(0,xlim=c(1,length(ranksig)),ylim=c(0,1),type="n",xaxt="n")
+
+        targets<-mraobj$regulon[[mr]]$tfmode
+        # Positive targets
+        postargets<-names(targets[targets>0])
+        postargets<-intersect(names(ranksig),postargets)
+        pos<-ranksig[postargets]
+        if(length(pos)>0){
+            segments(pos,0.4,pos,1,col=paste0("#CD0000",transp[postargets]),lwd=3)
+        }
+        # Negative targets
+        negtargets<-names(targets[targets<0])
+        negtargets<-intersect(names(ranksig),negtargets)
+        neg<-ranksig[negtargets]
+        if(length(neg)>0){
+            segments(neg,0,neg,0.6,col=paste0("#000080",transp[negtargets]),lwd=3)
+        }
+
+        # text(0,0.5,labels="-",pos=4,cex=12,font=1)
+        # text(length(ranksig),0.5,labels="+",pos=2,cex=10,font=1)
+        uparrow<-intToUtf8(8593)
+        dnarrow<-intToUtf8(8595)
+        text(length(ranksig)/2,0.5,labels=paste0(dnarrow,"   ",uparrow),pos=NULL,cex=10,font=2)
+        par(mar=opar)
+
+        ### Keep blank to separate from the next MR
+        titplot("")
+     }
 }
-
 
