@@ -1,4 +1,5 @@
 #' Perform Master Regulator Analysis (mra).
+#'
 #' The analysis is performed between two groups of samples in the form of expression matrices,
 #' with genes/features as rows and samples as columns.
 #' @param expmat1 A numeric expression matrix, with genes/features as rows and samples as columns.
@@ -23,6 +24,7 @@
 #' vector in multisample mode, a matrix in sample-by-sample mode.
 #' \item pvalue: the pvalue of the enrichment.
 #' \item sig: the calculated signature (useful for plotting).
+#' \item regulon: the original regulon used in the analysis (but filtered for _minsize_)
 #' \item atac: Optionally present if atacseq data is provided. For each centroid/TF a number
 #' ranging from 0 to 1 will indicate the fraction of changes in activity due to promoter effects
 #' rather than distal effects.
@@ -110,7 +112,22 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbo
         if(myscore==0){mynes<-0}
         return(mynes)
     })
+    nes[nes==Inf]<-max(nes[nes!=Inf])
+    nes[nes==-Inf]<-min(nes[nes!=-Inf])
 
-    outlist<-list(nes=nes,pvalue=z2p(nes),sig=sig)
+    outlist<-list(nes=nes,pvalue=z2p(nes),sig=sig,regulon=regulon)
     return(outlist)
 }
+
+#' Plot a master regulator analysis
+#'
+#' Plotting function for master regulator analysis performed by the _mra_ function
+#' @param mraobj The input object, output of the function mra
+#' @param mrs Either a numeric value indicating how many MRs to show, sorted by
+#' significance, or a character vector specifying which TFs to show
+#' @return A plot is generated
+mraplot<-function(mraobj){
+
+}
+
+

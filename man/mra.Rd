@@ -41,6 +41,7 @@ in expmat1 vs expmat2 (or in expmat1 vs the mean of the dataset), negative if do
 vector in multisample mode, a matrix in sample-by-sample mode.
 \item pvalue: the pvalue of the enrichment.
 \item sig: the calculated signature (useful for plotting).
+\item regulon: the original regulon used in the analysis (but filtered for _minsize_)
 \item atac: Optionally present if atacseq data is provided. For each centroid/TF a number
 ranging from 0 to 1 will indicate the fraction of changes in activity due to promoter effects
 rather than distal effects.
