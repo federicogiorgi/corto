@@ -207,6 +207,7 @@ mraplot<-function(mraobj,mrs=NULL){
     # Define Transparency for barcode plot coloring ----
     transp<-255*(ranksigabs^3)/(length(ranksigabs)^3)
     transp<-as.hexmode(round(transp))
+    transp<-format(transp,width=2)
     names(transp)<-names(ranksig)
 
     # Fille the plot with MR blocks ----
