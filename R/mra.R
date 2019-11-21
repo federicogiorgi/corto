@@ -30,10 +30,12 @@
 #' rather than distal effects.
 #' }
 #' @export
-mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbose=FALSE,atacseq=NULL){
+mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbose=FALSE,
+              atacseq=NULL){
     # Filter by minsize TO DO
     regsizes<-sapply(regulon,function(x){length(x$likelihood)})
     regulon<-regulon[regsizes>=minsize]
+    regsizes<-regsizes[names(regulon)]
 
     # First we create a centroid/target matrix
     centroids<-sort(names(regulon))
@@ -65,12 +67,18 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbo
     netmat<-netmat2
     rm(netmat2)
 
-    # Then we normalize by regulon length, otherwise TFs with small networks will be penalized
-    netmat<-t(apply(netmat,1,function(x){10*x/sum(abs(x))}))
-    netmat[is.na(netmat)]<-0
+    # # Then we normalize by regulon length, otherwise TFs with small networks will be penalized
+    # netmat<-t(apply(netmat,1,function(x){10*x/sum(abs(x))}))
+    # netmat[is.na(netmat)]<-0
 
     # Calculate unnormalized scores
     scores<-(netmat%*%sig)[,1]
+
+    # # Check Correlation of scores with regsizes
+    # regsizes<-regsizes[names(scores)]
+    # plot(regsizes,scores)
+    # mtext(paste0("Cor=",cor(regsizes,scores)))
+    # # Interestingly here there is no correlation
 
     #cands<-c("BAZ1A","HCFC1","HDGF","MAZ","ZNF146","ZNF532")
     #scores[cands]
@@ -112,15 +120,25 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbo
         mu<-mean(morescores)
         sigma<-sd(morescores)
         p<-pnorm(abs(myscore),mean=mu,sd=sigma,lower.tail=FALSE)*2
+        if(p==0){p<-.Machine$double.xmin}
         mynes<-p2z(p)*sign(myscore)
         if(myscore==0){mynes<-0}
         return(mynes)
     })
-    nes[nes==Inf]<-max(nes[nes!=Inf])
-    nes[nes==-Inf]<-min(nes[nes!=-Inf])
-
     outlist<-list(nes=nes,pvalue=z2p(nes),sig=sig,regulon=regulon)
     return(outlist)
+
+    # # Check correlation regsize nes
+    # regsizes<-regsizes[names(nes)]
+    # plot(regsizes,nes,col="grey")
+    # mtext(paste0("Cor=",cor(regsizes,nes)))
+    # text(regsizes[cands],nes[cands],labels=cands,col="black",cex=2,font=2)
+    #
+    # # Check correlation scores nes
+    # scores<-scores[names(nes)]
+    # plot(scores,nes)
+    # mtext(paste0("Cor=",cor(scores,nes)))
+
 }
 
 #' Plot a master regulator analysis
