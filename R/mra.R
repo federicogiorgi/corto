@@ -11,7 +11,7 @@
 #' @param regulon A _regulon_ object, output of the _corto_ function.
 #' @param minsize A minimum network size for each centroid/TF to be analyzed. Default is 10.
 #' @param nperm The number of times the input data will be permuted to generate null signatures.
-#' Default is 100.
+#' Default is 1000 if expmat2 is provided, and 10 if expmat2 is not provided (single sample mra).
 #' @param nthreads The number of threads to use for generating null signatures. Default is 1
 #' @param atacseq An optional 3 column matrix derived from an ATAC-Seq analysis, indicating
 #' 1) gene symbol, 2) -log10(FDR)*sing(log2FC) of an ATAC-Seq design, 3) distance from TSS.
@@ -30,9 +30,18 @@
 #' rather than distal effects.
 #' }
 #' @export
-mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbose=FALSE,
+mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verbose=FALSE,
               atacseq=NULL){
-    # Filter by minsize TO DO
+    # Setting default nperm if not set by the user
+    if(is.null(nperm)){
+        if(is.null(expmat2)){
+            nperm<-10
+        } else{
+            nperm<-1000
+        }
+    }
+
+    # Filter by minsize
     regsizes<-sapply(regulon,function(x){length(x$likelihood)})
     regulon<-regulon[regsizes>=minsize]
     regsizes<-regsizes[names(regulon)]
@@ -47,98 +56,172 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=100,nthreads=2,verbo
         netmat[centroid,names(vec)]<-vec
     }
 
-    # Multisample: we create a signature
-    sig<-setNames(apply(cbind(expmat1,expmat2),1,function(x){
-        x1<-x[1:ncol(expmat1)]
-        x2<-x[(ncol(expmat1)+1):length(x)]
-        tt<-t.test(x1,x2)
-        return(tt$statistic)
-    }),rownames(expmat1))
-    sig<-sig[!is.na(sig)]
-    common<-intersect(names(sig),colnames(netmat))
-    sig<-sig[common]
-    netmat<-netmat[,common]
-
-    # Then we slightly reduce the contribution of targets shared by multiple centroids
-    # But only targets in the signature
-    netmat2<-apply(netmat,2,function(x){x/(sum(x!=0)^0.5)})
-    # plot(netmat[,1:20],netmat2[,1:20])
-    # abline(h=0,v=0)
-    netmat<-netmat2
-    rm(netmat2)
-
-    # # Then we normalize by regulon length, otherwise TFs with small networks will be penalized
-    # netmat<-t(apply(netmat,1,function(x){10*x/sum(abs(x))}))
-    # netmat[is.na(netmat)]<-0
-
-    # Calculate unnormalized scores
-    scores<-(netmat%*%sig)[,1]
-
-    # # Check Correlation of scores with regsizes
-    # regsizes<-regsizes[names(scores)]
-    # plot(regsizes,scores)
-    # mtext(paste0("Cor=",cor(regsizes,scores)))
-    # # Interestingly here there is no correlation
-
-    #cands<-c("BAZ1A","HCFC1","HDGF","MAZ","ZNF146","ZNF532")
-    #scores[cands]
-
-    # Permuted signatures
-    nullsigperm<-function(seed=0,expmat1,expmat2,netmat){
-        permat<-cbind(expmat1,expmat2)
-        set.seed(seed)
-        permat<-permat[sample(nrow(permat)),]
-        permat<-permat[,sample(ncol(permat))]
-        nullsig<-setNames(apply(permat,1,function(x){
+    # Case 1: expmat2 is provided as control
+    if(!is.null(expmat2)){
+        # We create a signature
+        sig<-setNames(apply(cbind(expmat1,expmat2),1,function(x){
             x1<-x[1:ncol(expmat1)]
             x2<-x[(ncol(expmat1)+1):length(x)]
             tt<-t.test(x1,x2)
             return(tt$statistic)
-        }),rownames(permat))
-        nullsig<-nullsig[colnames(netmat)]
-        nullscores<-(netmat%*%nullsig)[,1]
-        return(nullscores)
+        }),rownames(expmat1))
+        sig<-sig[!is.na(sig)]
+        common<-intersect(names(sig),colnames(netmat))
+        sig<-sig[common]
+        netmat<-netmat[,common]
+
+        # Then we slightly reduce the contribution of targets shared by multiple centroids
+        # But only targets in the signature
+        netmat2<-apply(netmat,2,function(x){x/(sum(x!=0)^0.5)})
+        # plot(netmat[,1:20],netmat2[,1:20])
+        # abline(h=0,v=0)
+        netmat<-netmat2
+        rm(netmat2)
+
+        # # Then we normalize by regulon length, otherwise TFs with small networks will be penalized
+        # netmat<-t(apply(netmat,1,function(x){10*x/sum(abs(x))}))
+        # netmat[is.na(netmat)]<-0
+
+        # Calculate unnormalized scores
+        scores<-(netmat%*%sig)[,1]
+
+        # # Check Correlation of scores with regsizes
+        # regsizes<-regsizes[names(scores)]
+        # plot(regsizes,scores)
+        # mtext(paste0("Cor=",cor(regsizes,scores)))
+        # # Interestingly here there is no correlation
+
+        #cands<-c("BAZ1A","HCFC1","HDGF","MAZ","ZNF146","ZNF532")
+        #scores[cands]
+
+        # Permuted signatures
+        nullsigperm1<-function(seed=0,expmat1,expmat2,netmat){
+            permat<-cbind(expmat1,expmat2)
+            set.seed(seed)
+            permat<-permat[sample(nrow(permat)),]
+            permat<-permat[,sample(ncol(permat))]
+            nullsig<-setNames(apply(permat,1,function(x){
+                if(!is.null(expmat2)){
+                    x1<-x[1:ncol(expmat1)]
+                    x2<-x[(ncol(expmat1)+1):length(x)]
+                    tt<-t.test(x1,x2)
+                } else {
+                    x<-x-mean(x)
+                    tt<-t.test(x)
+                }
+                return(tt$statistic)
+            }),rownames(permat))
+            nullsig<-nullsig[colnames(netmat)]
+            nullscores<-(netmat%*%nullsig)[,1]
+            return(nullscores)
+        }
+
+        # The pbapply snippet
+        cl<-parallel::makeCluster(nthreads)
+        #invisible(parallel::clusterExport(cl=cl,varlist=c("nthreads")))
+        #invisible(parallel::clusterEvalQ(cl= cl,library(dplyr)))
+        nullscores<-pbsapply(cl=cl,
+                             X=1:nperm,
+                             FUN=nullsigperm1,
+                             expmat1=expmat1,expmat2=expmat2,netmat=netmat
+        )
+        parallel::stopCluster(cl)
+
+
+        # Compare scores with nullscores
+        # Fit gaussians
+        nes<-apply(cbind(scores,nullscores),1,function(x){
+            myscore<-x[1]
+            morescores<-x[2:length(x)]
+            mu<-mean(morescores)
+            sigma<-sd(morescores)
+            p<-pnorm(abs(myscore),mean=mu,sd=sigma,lower.tail=FALSE)*2
+            if(p==0){p<-.Machine$double.xmin}
+            mynes<-p2z(p)*sign(myscore)
+            if(myscore==0){mynes<-0}
+            return(mynes)
+        })
+        outlist<-list(nes=nes,pvalue=z2p(nes),sig=sig,regulon=regulon)
+        return(outlist)
+
+        # # Check correlation regsize nes
+        # regsizes<-regsizes[names(nes)]
+        # plot(regsizes,nes,col="grey")
+        # mtext(paste0("Cor=",cor(regsizes,nes)))
+        # text(regsizes[cands],nes[cands],labels=cands,col="black",cex=2,font=2)
+        #
+        # # Check correlation scores nes
+        # scores<-scores[names(nes)]
+        # plot(scores,nes)
+        # mtext(paste0("Cor=",cor(scores,nes)))
+
+    } else { # Case 2: expmat2 is not provided
+        # Create signatures
+        sigmat<-t(apply(expmat1,1,function(x){
+            y<-(x-mean(x))/sd(x)
+            return(y)
+        }))
+        # sigs<-t(scale(t(expmat1))) # Exactly the same
+        sigmat[is.na(sigmat)]<-0
+        common<-intersect(rownames(sigmat),colnames(netmat))
+        sigmat<-sigmat[common,]
+        netmat<-netmat[,common]
+
+        # Then we slightly reduce the contribution of targets shared by multiple centroids
+        # But only targets in the signature
+        netmat<-apply(netmat,2,function(x){x/(sum(x!=0)^0.5)})
+
+        # Calculate unnormalized scores
+        scores<-(netmat%*%sigmat)
+
+        # Permuted signatures
+        nullsigperm2<-function(seed=0,expmat1,netmat){
+            permat<-expmat1
+            set.seed(seed)
+            permat<-permat[sample(nrow(permat)),]
+            permat<-permat[,sample(ncol(permat))]
+            nullsigmat<-t(apply(permat,1,function(x){
+                y<-(x-mean(x))/sd(x)
+                return(y)
+            }))
+            nullsigmat<-nullsigmat[colnames(netmat),]
+            nullscores<-(netmat%*%nullsigmat)
+            return(nullscores)
+        }
+
+        # The pbapply snippet
+        cl<-parallel::makeCluster(nthreads)
+        #invisible(parallel::clusterExport(cl=cl,varlist=c("nthreads")))
+        #invisible(parallel::clusterEvalQ(cl= cl,library(dplyr)))
+        nullscores<-pblapply(cl=cl,
+                             X=1:nperm,
+                             FUN=nullsigperm2,
+                             expmat1=expmat1,netmat=netmat
+        )
+        parallel::stopCluster(cl)
+        nullscores<-do.call(cbind,nullscores)
+
+        # Compare scores with nullscores
+        # Fit gaussians
+        nes<-t(apply(cbind(scores,nullscores),1,function(x){
+            myscores<-x[1:ncol(scores)]
+            morescores<-x[(ncol(scores)+1):length(x)]
+            mu<-mean(morescores)
+            sigma<-sd(morescores)
+            ps<-pnorm(abs(myscores),mean=mu,sd=sigma,lower.tail=FALSE)*2
+            ps[ps==0]<-.Machine$double.xmin
+            mynes<-p2z(ps)*sign(myscores)
+            mynes[myscores==0]<-0
+            return(mynes)
+        }))
+        return(nes)
+        # pnb<-nes["MYCN",names(hashtags)[hashtags=="pnb"]]
+        # ctr<-nes["MYCN",names(hashtags)[hashtags=="ctr"]]
+        # plot(density(pnb),col="red",lwd=3,main="MYCN Activity")
+        # lines(density(ctr),col="blue",lwd=3)
+        # legend("topright",col=c("red","blue"),legend=c("Panobinostat","Control"),lwd=3)
+        # abline(v=0,lty=2)
     }
-
-    # The pbapply snippet
-    cl<-parallel::makeCluster(nthreads)
-    #invisible(parallel::clusterExport(cl=cl,varlist=c("nthreads")))
-    #invisible(parallel::clusterEvalQ(cl= cl,library(dplyr)))
-    nullscores<-pbsapply(cl=cl,
-                         X=1:nperm,
-                         FUN=nullsigperm,
-                         expmat1=expmat1,expmat2=expmat2,netmat=netmat
-    )
-    parallel::stopCluster(cl)
-
-
-    # Compare scores with nullscores
-    # Fit gaussians
-    nes<-apply(cbind(scores,nullscores),1,function(x){
-        myscore<-x[1]
-        morescores<-x[2:length(x)]
-        mu<-mean(morescores)
-        sigma<-sd(morescores)
-        p<-pnorm(abs(myscore),mean=mu,sd=sigma,lower.tail=FALSE)*2
-        if(p==0){p<-.Machine$double.xmin}
-        mynes<-p2z(p)*sign(myscore)
-        if(myscore==0){mynes<-0}
-        return(mynes)
-    })
-    outlist<-list(nes=nes,pvalue=z2p(nes),sig=sig,regulon=regulon)
-    return(outlist)
-
-    # # Check correlation regsize nes
-    # regsizes<-regsizes[names(nes)]
-    # plot(regsizes,nes,col="grey")
-    # mtext(paste0("Cor=",cor(regsizes,nes)))
-    # text(regsizes[cands],nes[cands],labels=cands,col="black",cex=2,font=2)
-    #
-    # # Check correlation scores nes
-    # scores<-scores[names(nes)]
-    # plot(scores,nes)
-    # mtext(paste0("Cor=",cor(scores,nes)))
-
 }
 
 #' Plot a master regulator analysis
@@ -337,11 +420,11 @@ mraplot<-function(mraobj,mrs=NULL){
         # text(length(ranksig),0.5,labels="+",pos=2,cex=10,font=1)
         uparrow<-intToUtf8(8593)
         dnarrow<-intToUtf8(8595)
-        text(length(ranksig)/2,0.5,labels=paste0(dnarrow,"   ",uparrow),pos=NULL,cex=10,font=2)
+        text(length(ranksig)/2,0.5,labels=paste0(dnarrow,"   ",uparrow),pos=NULL,cex=5,font=2)
         par(mar=opar)
 
         ### Keep blank to separate from the next MR
         titplot("")
-     }
+    }
 }
 

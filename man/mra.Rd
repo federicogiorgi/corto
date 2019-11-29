@@ -4,7 +4,7 @@
 \alias{mra}
 \title{Perform Master Regulator Analysis (mra).}
 \usage{
-mra(expmat1, expmat2 = NULL, regulon, minsize = 10, nperm = 100,
+mra(expmat1, expmat2 = NULL, regulon, minsize = 10, nperm = NULL,
   nthreads = 2, verbose = FALSE, atacseq = NULL)
 }
 \arguments{
@@ -21,7 +21,7 @@ If provided, it will be considered as the "control" or "reference" sample set fo
 \item{minsize}{A minimum network size for each centroid/TF to be analyzed. Default is 10.}
 
 \item{nperm}{The number of times the input data will be permuted to generate null signatures.
-Default is 100.}
+Default is 1000 if expmat2 is provided, and 10 if expmat2 is not provided (single sample mra).}
 
 \item{nthreads}{The number of threads to use for generating null signatures. Default is 1}
 
