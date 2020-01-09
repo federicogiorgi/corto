@@ -273,7 +273,7 @@ scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,pch=20,...){
   common<-intersect(names(x),names(y))
   x<-x[common]
   y<-y[common]
-  plot(x,y,...)
+  plot(x,y,pch=pch,...)
   cc<-cor.test(x,y,method=method)
   ccp<-signif(cc$p.value,3)
   cccor<-signif(cc$estimate,3)
