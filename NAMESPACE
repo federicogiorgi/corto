@@ -12,16 +12,17 @@ export(p2z)
 export(plot_gsea)
 export(plot_gsea2)
 export(r2p)
+export(scatter)
 export(slice)
 export(stouffer)
 export(wstouffer)
 export(z2p)
-importFrom("stats","cor","pt","qt","setNames","var","lm","t.test","sd",
+importFrom("stats","cor","cor.test","pt","qt","setNames","var","lm","t.test","sd",
     "pchisq","ks.test", "pnorm", "qnorm", "quantile")
 importFrom("utils", "setTxtProgressBar", "txtProgressBar")
 import("parallel")
 import("pbapply")
 importFrom("plotrix","draw.circle")
 importFrom("dplyr", "%>%", "filter", "group_by")
-importFrom("graphics","abline","grid","layout","legend","lines","arrows","box",
+importFrom("graphics","abline","arrows","box","grid","layout","legend","lines","mtext",
 "segments","par","plot","rect","text")

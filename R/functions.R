@@ -245,3 +245,45 @@ kmgformat <- function(input, roundParam = 1) {
   output <- paste0(signs, output)
   return(output)
 }
+
+#' scatter - XY scatter plot with extra information
+#'
+#' This function will plot two variables (based on their common names), calculate their
+#' Coefficient of Correlation (CC), plot a linear regression line and color the background
+#' if the correlation is positive (red), negative
+#' (blue) or non-significant (white)
+#'
+#' @param x The first named vector
+#' @param y The second named vector
+#' @param method a character string indicating which correlation coefficient is to
+#' be computed. One of "pearson" (default), "kendall", or "spearman": can be abbreviated.
+#' @param threshold a numeric value indicating the significance threshold (p-value) of the correlation,
+#' in order to show a colored background. Default is 0.01.
+#' @param showLine a boolean indicating if a linear regression line should be plotted. Default is
+#' TRUE
+#' @param pch the _pch_ parameter indicating the points shape. Default is 20
+#' @param ... Arguments to be passed to the core _plot_ function
+#' @return A plot
+#' @examples
+#' x<-setNames(rnorm(200),paste0("var",1:200))
+#' y<-setNames(rnorm(210),paste0("var",11:220))
+#' scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package")
+#' @export
+scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,pch=20,...){
+  common<-intersect(names(x),names(y))
+  x<-x[common]
+  y<-y[common]
+  plot(x,y,...)
+  cc<-cor.test(x,y,method=method)
+  ccp<-signif(cc$p.value,3)
+  cccor<-signif(cc$estimate,3)
+  mtext(paste0("CC=",cccor," (p=",ccp,")"),cex=0.6)
+  if(cccor>=0){bgcol<-"#FF000033"}else{bgcol<-"#0000FF33"}
+  if(ccp>0.01){bgcol<-"#FFFFFF00"}
+  rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],col=bgcol)
+  grid(col="gray10")
+  if(showLine){
+    lm1<-lm(y~x)
+    abline(lm1$coef)
+  }
+}

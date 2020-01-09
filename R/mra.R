@@ -16,7 +16,7 @@
 #' @param atacseq An optional 3 column matrix derived from an ATAC-Seq analysis, indicating
 #' 1) gene symbol, 2) -log10(FDR)*sing(log2FC) of an ATAC-Seq design, 3) distance from TSS.
 #' If provided, the output will contain an _atacseq_ field.
-#' @param verbose Boolean, whether to print full messages on progress analysis
+#' @param verbose Boolean, whether to print full messages on progress analysis. Default is FALSE
 #' @return A list summarizing the master regulator analysis
 #' \itemize{
 #' \item nes: the normalized enrichment score: positive if the centroid/TF network is upregulated

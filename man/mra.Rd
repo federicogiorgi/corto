@@ -25,7 +25,7 @@ Default is 1000 if expmat2 is provided, and 10 if expmat2 is not provided (singl
 
 \item{nthreads}{The number of threads to use for generating null signatures. Default is 1}
 
-\item{verbose}{Boolean, whether to print full messages on progress analysis}
+\item{verbose}{Boolean, whether to print full messages on progress analysis. Default is FALSE}
 
 \item{atacseq}{An optional 3 column matrix derived from an ATAC-Seq analysis, indicating
 1) gene symbol, 2) -log10(FDR)*sing(log2FC) of an ATAC-Seq design, 3) distance from TSS.
