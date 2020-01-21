@@ -16,7 +16,7 @@ install_github("federicogiorgi/corto")
 
 
 # Donation
-If this project helps you, you can give me us cup of coffee!
+If you help us buying a cup of coffee, we will convert the caffeine into code improvements!
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](federico.giorgi@gmail.com)
 
