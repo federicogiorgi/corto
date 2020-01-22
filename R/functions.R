@@ -279,7 +279,7 @@ scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,pch=20,...){
   cccor<-signif(cc$estimate,3)
   mtext(paste0("CC=",cccor," (p=",ccp,")"),cex=0.6)
   if(cccor>=0){bgcol<-"#FF000033"}else{bgcol<-"#0000FF33"}
-  if(ccp>0.01){bgcol<-"#FFFFFF00"}
+  if(ccp>threshold){bgcol<-"#FFFFFF00"}
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],col=bgcol)
   grid(col="gray10")
   if(showLine){

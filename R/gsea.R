@@ -330,7 +330,7 @@ plot_gsea <- function(gsea.obj, twoColors = c("red",
         if (es >= 0) {
             legend_position <- "topright"
         } else {
-            legend_position <- "topleft"
+            legend_position <- "bottomleft"
         }
 
         # If an external NES is not provided, the
