@@ -262,6 +262,8 @@ kmgformat <- function(input, roundParam = 1) {
 #' @param showLine a boolean indicating if a linear regression line should be plotted. Default is
 #' TRUE
 #' @param pch the _pch_ parameter indicating the points shape. Default is 20
+#' @param extendXlim logical. If TRUE, the x-axis limits are extended by a fraction (useful for
+#' labeling points on the margins of the plot area). Default is FALSE
 #' @param ... Arguments to be passed to the core _plot_ function
 #' @return A plot
 #' @examples
@@ -269,11 +271,15 @@ kmgformat <- function(input, roundParam = 1) {
 #' y<-setNames(rnorm(210),paste0("var",11:220))
 #' scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package")
 #' @export
-scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,pch=20,...){
+scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,pch=20,extendXlim=FALSE,...){
   common<-intersect(names(x),names(y))
   x<-x[common]
   y<-y[common]
-  plot(x,y,pch=pch,...)
+  if(!extendXlim){
+    plot(x,y,pch=pch,...)
+  }else{
+    plot(x,y,pch=pch,xlim=1.2*c(min(x),max(x)),...)
+  }
   cc<-cor.test(x,y,method=method)
   ccp<-signif(cc$p.value,3)
   cccor<-signif(cc$estimate,3)

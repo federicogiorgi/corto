@@ -5,7 +5,7 @@
 \title{scatter - XY scatter plot with extra information}
 \usage{
 scatter(x, y, method = "pearson", threshold = 0.01, showLine = TRUE,
-  pch = 20, ...)
+  pch = 20, extendXlim = FALSE, ...)
 }
 \arguments{
 \item{x}{The first named vector}
@@ -22,6 +22,9 @@ in order to show a colored background. Default is 0.01.}
 TRUE}
 
 \item{pch}{the _pch_ parameter indicating the points shape. Default is 20}
+
+\item{extendXlim}{logical. If TRUE, the x-axis limits are extended by a fraction (useful for
+labeling points on the margins of the plot area). Default is FALSE}
 
 \item{...}{Arguments to be passed to the core _plot_ function}
 }

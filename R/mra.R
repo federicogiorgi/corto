@@ -285,15 +285,11 @@ mraplot<-function(mraobj,mrs=NULL){
 
     # Prefetch signature ----
     ranksig<-rank(mraobj$sig)
+    ranksiginv<-rank(-mraobj$sig)
     ranksigabs<-rank(abs(mraobj$sig))
 
-    # Define Transparency for barcode plot coloring ----
-    transp<-255*(ranksigabs^3)/(length(ranksigabs)^3)
-    transp<-as.hexmode(round(transp))
-    transp<-format(transp,width=2)
-    names(transp)<-names(ranksig)
 
-    # Fille the plot with MR blocks ----
+    # Fill the plot with MR blocks ----
     for(mr in mrs){
         # Name of the MR
         titplot(mr,cex=4)
@@ -316,7 +312,7 @@ mraplot<-function(mraobj,mrs=NULL){
         # titplot("Network goes here")
         opar<-par()$mar
         par(mar=c(0,0,0,0),xaxs="i")
-        plot(0,xlim=c(-1.5,1.5),ylim=c(-1.5,1.5),type="n",ann=F,bty='n',xaxt='n',yaxt='n')
+        plot(0,xlim=c(-1.5,1.5),ylim=c(-1.2,1.2),type="n",ann=F,bty='n',xaxt='n',yaxt='n')
 
         # Which targets to show
         targets<-names(mraobj$regulon[[mr]]$tfmode)
@@ -395,7 +391,39 @@ mraplot<-function(mraobj,mrs=NULL){
         box()
         par(mar=opar)
 
+
+
         ### Signature ----
+        # Define Transparency for barcode plot coloring
+        if(mraobj$nes[mr]>0&mraobj$pvalue[mr]<=0.01){
+            transp<-255*(ranksig^3)/(length(ranksig)^3)
+            transp<-as.hexmode(round(transp))
+            transp<-format(transp,width=2)
+            names(transp)<-names(ranksig)
+            transpinv<-255*(ranksiginv^3)/(length(ranksiginv)^3)
+            transpinv<-as.hexmode(round(transpinv))
+            transpinv<-format(transpinv,width=2)
+            names(transpinv)<-names(ranksig)
+        } else if(mraobj$nes[mr]<0&mraobj$pvalue[mr]<=0.01){
+            transp<-255*(ranksiginv^3)/(length(ranksiginv)^3)
+            transp<-as.hexmode(round(transp))
+            transp<-format(transp,width=2)
+            names(transp)<-names(ranksig)
+            transpinv<-255*(ranksig^3)/(length(ranksig)^3)
+            transpinv<-as.hexmode(round(transpinv))
+            transpinv<-format(transpinv,width=2)
+            names(transpinv)<-names(ranksig)
+        } else {
+            transp<-255*(ranksigabs^3)/(length(ranksigabs)^3)
+            transp<-as.hexmode(round(transp))
+            transp<-format(transp,width=2)
+            names(transp)<-names(ranksig)
+            transpiv<-transp
+        }
+
+
+
+        # Start plotting
         opar<-par()$mar
         par(mar=c(0,0,0,0),xaxs="i")
         plot(0,xlim=c(1,length(ranksig)),ylim=c(0,1),type="n",xaxt="n")
@@ -413,7 +441,7 @@ mraplot<-function(mraobj,mrs=NULL){
         negtargets<-intersect(names(ranksig),negtargets)
         neg<-ranksig[negtargets]
         if(length(neg)>0){
-            segments(neg,0,neg,0.6,col=paste0("#000080",transp[negtargets]),lwd=3)
+            segments(neg,0,neg,0.6,col=paste0("#000080",transpinv[negtargets]),lwd=3)
         }
 
         # text(0,0.5,labels="-",pos=4,cex=12,font=1)

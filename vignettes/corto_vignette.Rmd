@@ -1,10 +1,11 @@
 ---
 title: "A short introduction to the _corto_ Package"
 author: | 
-  | Federico M. Giorgi
-  | Department of Pharmacy and Biotechnology, University of Bologna
-date: "1 November 2019"
-output: rmarkdown::html_vignette
+  | Daniele Mercatelli^1^, Gonzalo Lopez-Garcia^2^, Federico M. Giorgi^1^
+  | ^1^Department of Pharmacy and Biotechnology, University of Bologna, Italy
+  | ^2^Department of Genetics and Genomic Sciences, Icahn School of Medicine at Mount Sinai, USA
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
 vignette: >
   %\VignetteIndexEntry{corto_vignette}
   %\VignetteEngine{knitr::rmarkdown}
