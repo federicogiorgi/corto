@@ -22,7 +22,7 @@ Description: We present 'corto' (Correlation Tool), a simple package to infer
 License: LGPL-3
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Depends: R (>= 3.6)
 NeedsCompilation: no
 Imports:

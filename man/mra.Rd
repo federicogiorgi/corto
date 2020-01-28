@@ -4,8 +4,16 @@
 \alias{mra}
 \title{Perform Master Regulator Analysis (mra).}
 \usage{
-mra(expmat1, expmat2 = NULL, regulon, minsize = 10, nperm = NULL,
-  nthreads = 2, verbose = FALSE, atacseq = NULL)
+mra(
+  expmat1,
+  expmat2 = NULL,
+  regulon,
+  minsize = 10,
+  nperm = NULL,
+  nthreads = 2,
+  verbose = FALSE,
+  atacseq = NULL
+)
 }
 \arguments{
 \item{expmat1}{A numeric expression matrix, with genes/features as rows and samples as columns.

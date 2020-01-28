@@ -4,9 +4,14 @@
 \alias{plot_gsea2}
 \title{Plot 2-way GSEA results}
 \usage{
-plot_gsea2(gsea.obj, twoColors = c("red", "blue"), plotNames = FALSE,
-  title = "Running Enrichment Score", bottomTitle = "List Values",
-  bottomYlabel = "Signature values")
+plot_gsea2(
+  gsea.obj,
+  twoColors = c("red", "blue"),
+  plotNames = FALSE,
+  title = "Running Enrichment Score",
+  bottomTitle = "List Values",
+  bottomYlabel = "Signature values"
+)
 }
 \arguments{
 \item{gsea.obj}{GSEA object produced by the \code{gsea} function}

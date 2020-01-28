@@ -5,8 +5,15 @@
 \title{2-way GSEA
 GSEA Gene set enrichment analysis of two complementary gene sets using gsea}
 \usage{
-gsea2(reflist, set1, set2, method = c("permutation", "pareto"),
-  np = 1000, w = 1, gsea_null = NULL)
+gsea2(
+  reflist,
+  set1,
+  set2,
+  method = c("permutation", "pareto"),
+  np = 1000,
+  w = 1,
+  gsea_null = NULL
+)
 }
 \arguments{
 \item{reflist}{named vector of reference scores}

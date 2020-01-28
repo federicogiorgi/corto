@@ -4,8 +4,16 @@
 \alias{scatter}
 \title{scatter - XY scatter plot with extra information}
 \usage{
-scatter(x, y, method = "pearson", threshold = 0.01, showLine = TRUE,
-  pch = 20, extendXlim = FALSE, ...)
+scatter(
+  x,
+  y,
+  method = "pearson",
+  threshold = 0.01,
+  showLine = TRUE,
+  pch = 20,
+  extendXlim = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{The first named vector}

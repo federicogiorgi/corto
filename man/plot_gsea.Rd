@@ -4,10 +4,17 @@
 \alias{plot_gsea}
 \title{Plot GSEA results}
 \usage{
-plot_gsea(gsea.obj, twoColors = c("red", "blue"), plotNames = FALSE,
-  colBarcode = "black", title = "Running Enrichment Score",
-  bottomTitle = "List Values", bottomYlabel = "Signature values",
-  ext_nes = NULL, omit_middle = FALSE)
+plot_gsea(
+  gsea.obj,
+  twoColors = c("red", "blue"),
+  plotNames = FALSE,
+  colBarcode = "black",
+  title = "Running Enrichment Score",
+  bottomTitle = "List Values",
+  bottomYlabel = "Signature values",
+  ext_nes = NULL,
+  omit_middle = FALSE
+)
 }
 \arguments{
 \item{gsea.obj}{GSEA object produced by the \code{gsea} function}

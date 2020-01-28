@@ -4,8 +4,15 @@
 \alias{corto}
 \title{Calculate a regulon from a data matrix}
 \usage{
-corto(inmat, centroids, nbootstraps = 100, p = 1e-30, nthreads = 1,
-  verbose = FALSE, cnvmat = NULL)
+corto(
+  inmat,
+  centroids,
+  nbootstraps = 100,
+  p = 1e-30,
+  nthreads = 1,
+  verbose = FALSE,
+  cnvmat = NULL
+)
 }
 \arguments{
 \item{inmat}{Input matrix, with features (e.g. genes) as rows and samples

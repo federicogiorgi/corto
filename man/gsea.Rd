@@ -4,8 +4,14 @@
 \alias{gsea}
 \title{GSEA}
 \usage{
-gsea(reflist, set, method = c("permutation", "pareto"), np = 1000,
-  w = 1, gsea_null = NULL)
+gsea(
+  reflist,
+  set,
+  method = c("permutation", "pareto"),
+  np = 1000,
+  w = 1,
+  gsea_null = NULL
+)
 }
 \arguments{
 \item{reflist}{named vector of reference scores}
