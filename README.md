@@ -23,14 +23,22 @@ If you help us buying a cup of coffee, we will convert the caffeine into code im
 # Introduction
 The _corto_ ("correlation tool") package provides a pipeline to infer networks between "centroid" and "target" variables in a dataset, using a combination of Spearman correlation and Data Processing Inequality (DPI), first proposed in [1]. The main application of _corto_ is in the field of Bioinformatics and Transcriptomics, where co-occurrence between variables can be used as a mean to infer regulatory mechanisms [2] or gene functions [3]. In this field, usually the tested features are genes (or rather, their expression profile across samples), whereas the centroids are Transcription Factors (TFs) and their targets are Target Genes (TGs). The TF-TG co-expression can hint at a causal regulatory relationship, as proven in many studies [4,5,6]. The _corto_ tool replicates the well-established pipeline of the ARACNe family of tools [7,8,9]
 
+_corto_ is able to perform the following analysis tasks
+
+1. Gene Network Inference, with DPI steps and Bootstrapping
+2.
+
+
+## The _corto_ Gene Network Inference Algorithm
 In brief, _corto_ operates using the following steps:
 
 1. Load a gene expression matrix and a list of user-provided centroids (e.g. TFs). Data should be normalized via Variance Stabilizing Transformation (VST) for RNA-Seq, and Robust Multiarray Average (RMA) for microarrays, as described in [10].
-2. Calculate all pairwise Spearman correlation coefficients between centroid and target features. The rank transformation operated by the Spearman correlation coefficient is a common procedure used in co-expression based studies, due to its benefits in reducing the effects of outliers [11].
-3. Filter out all centroid-target features whose correlation coefficient _absolute value_ is below the provided p-value threshold _p_.
-4. Apply DPI to all centroid-centroid-target triplets, in order to identify which centroid-target correlation is stronger and identify the most likely association (e.g. which TF is the most likely regulator of the TG in the dataset).
-5. All edges are tested for Data Processing Inequality in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [8]). This step can be run in parallel by specifiying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
-6. A network is generated in the form of a list, where each element is a centroid-based list of targets. In order to follow the structure of the _regulon_ class implemented by downstream analysis packages (e.g. VIPER [12]), each target is characterized by two parameters:
+2. Removal of genes with zero variance across the dataset and rank-transformation of each gene expression profile.
+3. Calculate all pairwise Spearman correlation coefficients between centroid and target features. The rank transformation operated by the Spearman correlation coefficient is a common procedure used in co-expression based studies, due to its benefits in reducing the effects of outliers [11].
+4. Filter out all centroid-target features whose correlation coefficient _absolute value_ is below the provided p-value threshold _p_.
+5. Apply DPI to all centroid-centroid-target triplets, in order to identify which centroid-target correlation is stronger and identify the most likely association (e.g. which TF is the most likely regulator of the TG in the dataset).
+6. All edges are tested for Data Processing Inequality in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [8]). This step can be run in parallel by specifiying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
+7. A network is generated in the form of a list, where each element is a centroid-based list of targets. In order to follow the structure of the _regulon_ class implemented by downstream analysis packages (e.g. VIPER [12]), each target is characterized by two parameters:
     + The _tfmode_, the mode of action, i.e. the Spearman correlation coefficient between the target and the centroid in the original input matrix
     + The _likelihood_ of the interaction, calculated as the number of bootstraps in which the edge survives DPI, divided by the total number of bootstraps (in this impelmentation, the presence of an edge in the original, non-bootstrapped matrix is considered as an additional evidence)
 
@@ -132,5 +140,5 @@ regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRU
 
 [14] Gene Ontology Consortium. "The Gene Ontology (GO) database and informatics resource." Nucleic acids research 32.suppl_1 (2004): D258-D261.
 
-[15] Schubert, Michael, et al. "Gene networks in cancer are biased by aneuploidies and sample impurities." Biochimica et Biophisica Acata - Gene Regulatory Models (2019): 194444. DOI: https://doi.org/10.1016/j.bbagrm.2019.194444
+[15] Schubert, Michael, et al. "Gene networks in cancer are biased by aneuploidies and sample impurities." Biochimica et Biophisica Acta - Gene Regulatory Models (2019): 194444. DOI: https://doi.org/10.1016/j.bbagrm.2019.194444
 
