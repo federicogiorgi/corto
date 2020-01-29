@@ -23,10 +23,10 @@ If you help us buying a cup of coffee, we will convert the caffeine into code im
 # Introduction
 The _corto_ ("correlation tool") package provides a pipeline to infer networks between "centroid" and "target" variables in a dataset, using a combination of Spearman correlation and Data Processing Inequality (DPI), first proposed in [1]. The main application of _corto_ is in the field of Bioinformatics and Transcriptomics, where co-occurrence between variables can be used as a mean to infer regulatory mechanisms [2] or gene functions [3]. In this field, usually the tested features are genes (or rather, their expression profile across samples), whereas the centroids are Transcription Factors (TFs) and their targets are Target Genes (TGs). The TF-TG co-expression can hint at a causal regulatory relationship, as proven in many studies [4,5,6]. The _corto_ tool replicates the well-established pipeline of the ARACNe family of tools [7,8,9]
 
-_corto_ is able to perform the following analysis tasks
+_corto_ focuses on tho aspects:
 
-1. Gene Network Inference, with DPI steps and Bootstrapping
-2.
+1. Gene Network Inference, with DPI steps, Bootstrapping and optional CNV correction
+2. Gene Network Interrogation, via Master Regulator Analysis (MRA), with functions to visualize user-provided top deregulated networks on a specific signature.
 
 
 ## The _corto_ Gene Network Inference Algorithm
