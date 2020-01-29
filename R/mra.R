@@ -418,7 +418,7 @@ mraplot<-function(mraobj,mrs=NULL){
             transp<-as.hexmode(round(transp))
             transp<-format(transp,width=2)
             names(transp)<-names(ranksig)
-            transpiv<-transp
+            transpinv<-transp
         }
 
 
