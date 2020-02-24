@@ -229,10 +229,10 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 #' Plotting function for master regulator analysis performed by the _mra_ function
 #' @param mraobj The input object, output of the function mra
 #' @param mrs Either a numeric value indicating how many MRs to show, sorted by
-#' significance, or a character vector specifying which TFs to show
+#' significance, or a character vector specifying which TFs to show. Default is 5
 #' @return A plot is generated
 #' @export
-mraplot<-function(mraobj,mrs=NULL){
+mraplot<-function(mraobj,mrs=5){
     # Checks ----
     if(is.numeric(mrs)){
         mrs<-names(sort(abs(mraobj$nes),decreasing=TRUE))[1:mrs]
