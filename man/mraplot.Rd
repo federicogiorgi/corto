@@ -4,13 +4,13 @@
 \alias{mraplot}
 \title{Plot a master regulator analysis}
 \usage{
-mraplot(mraobj, mrs = NULL)
+mraplot(mraobj, mrs = 5)
 }
 \arguments{
 \item{mraobj}{The input object, output of the function mra}
 
 \item{mrs}{Either a numeric value indicating how many MRs to show, sorted by
-significance, or a character vector specifying which TFs to show}
+significance, or a character vector specifying which TFs to show. Default is 5}
 }
 \value{
 A plot is generated
