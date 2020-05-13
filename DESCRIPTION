@@ -1,7 +1,7 @@
 Package: corto
 Type: Package
 Title: Inference of Gene Regulatory Networks
-Version: 1.0.5
+Version: 1.0.8
 Authors@R: c(
  person("Federico M.","Giorgi",email = "federico.giorgi@gmail.com",role=c("aut","cre")),
  person("Daniele","Mercatelli",email = "danielemercatelli@gmail.com",role="ctb"),
@@ -17,12 +17,12 @@ Description: We present 'corto' (Correlation Tool), a simple package to infer
  the robustness of the network, eventually re-adding edges previously removed by DPI.
  The algorithm has been optimized to run outside a computing cluster, using a fast correlation
  implementation. The package finally provides functions to calculate network enrichment
- analysis from RNA-Seq and ATAC-Seq signatures as descibed in the article by
- Mercatelli, Lopez-Garcia and Giorgi (2020) <doi:10.1093/bioinformatics/btaa223>.
+ analysis from RNA-Seq and ATAC-Seq signatures as described in the article by
+ Giorgi lab (2020) <doi:10.1093/bioinformatics/btaa223>.
 License: LGPL-3
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Depends: R (>= 3.6)
 NeedsCompilation: no
 Imports:

@@ -230,9 +230,10 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 #' @param mraobj The input object, output of the function mra
 #' @param mrs Either a numeric value indicating how many MRs to show, sorted by
 #' significance, or a character vector specifying which TFs to show. Default is 5
+#' @param title Title of the plot (optional, default is "corto - Master Regulator Analysis")
 #' @return A plot is generated
 #' @export
-mraplot<-function(mraobj,mrs=5){
+mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis"){
     # Checks ----
     if(is.numeric(mrs)){
         mrs<-names(sort(abs(mraobj$nes),decreasing=TRUE))[1:mrs]
@@ -280,7 +281,7 @@ mraplot<-function(mraobj,mrs=5){
         par(mar=opar)
     }
     # Panels 1 and 2 are titles ----
-    titplot("corto - Master Regulator Analysis")
+    titplot(title)
     titplot("Top targets")
 
     # Prefetch signature ----
