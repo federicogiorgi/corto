@@ -213,6 +213,7 @@ kmgformat <- function(input, roundParam = 1) {
   signs <- sign(input)
   signs[signs == 1] <- ""
   signs[signs == -1] <- "-"
+  signs[signs == 0] <- ""
   absinput <- abs(input)
   output <- c()
   for (i in absinput) {
@@ -264,6 +265,10 @@ kmgformat <- function(input, roundParam = 1) {
 #' @param pch the _pch_ parameter indicating the points shape. Default is 20
 #' @param extendXlim logical. If TRUE, the x-axis limits are extended by a fraction (useful for
 #' labeling points on the margins of the plot area). Default is FALSE
+#' @param bgcol Boolean. Should a background coloring associated to significance and sign of
+#' correlation be used? Default is TRUE, and it will color the background in red if the correlation
+#' coefficient is positive, in blue if negative, in white if not significant (accordin to the
+#' _threshold_ parameter)
 #' @param ... Arguments to be passed to the core _plot_ function
 #' @return A plot
 #' @examples
@@ -271,7 +276,8 @@ kmgformat <- function(input, roundParam = 1) {
 #' y<-setNames(rnorm(210),paste0("var",11:220))
 #' scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package")
 #' @export
-scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,pch=20,extendXlim=FALSE,...){
+scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,bgcol=FALSE,pch=20,
+                  extendXlim=FALSE,...){
   common<-intersect(names(x),names(y))
   x<-x[common]
   y<-y[common]
@@ -284,9 +290,11 @@ scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,pch=20,exten
   ccp<-signif(cc$p.value,3)
   cccor<-signif(cc$estimate,3)
   mtext(paste0("CC=",cccor," (p=",ccp,")"),cex=0.6)
-  if(cccor>=0){bgcol<-"#FF000033"}else{bgcol<-"#0000FF33"}
-  if(ccp>threshold){bgcol<-"#FFFFFF00"}
-  rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],col=bgcol)
+  if(bgcol){
+    if(cccor>=0){bgcol<-"#FF000033"}else{bgcol<-"#0000FF33"}
+    if(ccp>threshold){bgcol<-"#FFFFFF00"}
+    rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],col=bgcol)
+  }
   grid(col="gray10")
   if(showLine){
     lm1<-lm(y~x)
