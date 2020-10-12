@@ -19,7 +19,9 @@ mra(
 \item{expmat1}{A numeric expression matrix, with genes/features as rows and samples as columns.
 If only expmat1 is provided (without expmat2), the function will perform a sample-by-sample
 master regulator analysis, with the mean of the dataset as a reference. If expmat2 is provided,
-expmat1 will be considered the "treatment" sample set.}
+expmat1 will be considered the "treatment" sample set. If a named vector is provided, with names
+as genes/features and values as signature values (e.g. T-test statistics), signature
+master regulator analysis is performed.}
 
 \item{expmat2}{A numeric expression matrix, with genes/features as rows and samples as columns.
 If provided, it will be considered as the "control" or "reference" sample set for expmat1.}

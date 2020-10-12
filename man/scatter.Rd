@@ -12,6 +12,7 @@ scatter(
   showLine = TRUE,
   bgcol = FALSE,
   pch = 20,
+  subtitle = NULL,
   extendXlim = FALSE,
   ...
 )
@@ -36,6 +37,9 @@ coefficient is positive, in blue if negative, in white if not significant (accor
 _threshold_ parameter)}
 
 \item{pch}{the _pch_ parameter indicating the points shape. Default is 20}
+
+\item{subtitle}{NULL by default, in which case the function will print as a subtitle the correlation
+coefficient (CC) and its pvalue. Otherwise, a user-provided string, bypassing the predefined subtitle}
 
 \item{extendXlim}{logical. If TRUE, the x-axis limits are extended by a fraction (useful for
 labeling points on the margins of the plot area). Default is FALSE}

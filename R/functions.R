@@ -263,6 +263,8 @@ kmgformat <- function(input, roundParam = 1) {
 #' @param showLine a boolean indicating if a linear regression line should be plotted. Default is
 #' TRUE
 #' @param pch the _pch_ parameter indicating the points shape. Default is 20
+#' @param subtitle NULL by default, in which case the function will print as a subtitle the correlation
+#' coefficient (CC) and its pvalue. Otherwise, a user-provided string, bypassing the predefined subtitle
 #' @param extendXlim logical. If TRUE, the x-axis limits are extended by a fraction (useful for
 #' labeling points on the margins of the plot area). Default is FALSE
 #' @param bgcol Boolean. Should a background coloring associated to significance and sign of
@@ -277,7 +279,7 @@ kmgformat <- function(input, roundParam = 1) {
 #' scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package")
 #' @export
 scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,bgcol=FALSE,pch=20,
-                  extendXlim=FALSE,...){
+                  subtitle=NULL,extendXlim=FALSE,...){
   common<-intersect(names(x),names(y))
   x<-x[common]
   y<-y[common]
@@ -289,7 +291,11 @@ scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,bgcol=FALSE,
   cc<-cor.test(x,y,method=method)
   ccp<-signif(cc$p.value,3)
   cccor<-signif(cc$estimate,3)
-  mtext(paste0("CC=",cccor," (p=",ccp,")"),cex=0.6)
+  if(is.null(subtitle)){
+    mtext(paste0("CC=",cccor," (p=",ccp,")"),cex=0.7)
+  } else {
+    mtext(subtitle,cex=0.7)
+  }
   if(bgcol){
     if(cccor>=0){bgcol<-"#FF000033"}else{bgcol<-"#0000FF33"}
     if(ccp>threshold){bgcol<-"#FFFFFF00"}

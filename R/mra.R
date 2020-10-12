@@ -5,7 +5,9 @@
 #' @param expmat1 A numeric expression matrix, with genes/features as rows and samples as columns.
 #' If only expmat1 is provided (without expmat2), the function will perform a sample-by-sample
 #' master regulator analysis, with the mean of the dataset as a reference. If expmat2 is provided,
-#' expmat1 will be considered the "treatment" sample set.
+#' expmat1 will be considered the "treatment" sample set. If a named vector is provided, with names
+#' as genes/features and values as signature values (e.g. T-test statistics), signature
+#' master regulator analysis is performed.
 #' @param expmat2 A numeric expression matrix, with genes/features as rows and samples as columns.
 #' If provided, it will be considered as the "control" or "reference" sample set for expmat1.
 #' @param regulon A _regulon_ object, output of the _corto_ function.
@@ -32,6 +34,7 @@
 #' @export
 mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verbose=FALSE,
               atacseq=NULL){
+
     # Setting default nperm if not set by the user
     if(is.null(nperm)){
         if(is.null(expmat2)){
@@ -55,6 +58,12 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
         vec<-sign(regulon[[centroid]]$tfmode)*regulon[[centroid]]$likelihood
         netmat[centroid,names(vec)]<-vec
     }
+
+    # Case 0: expmat1 is a signature
+    if(is.vector(expmat1)){
+        stop("Input data is provided as vector, Calculating Signature Master Regulator Analysis")
+    }
+
 
     # Case 1: expmat2 is provided as control
     if(!is.null(expmat2)){
