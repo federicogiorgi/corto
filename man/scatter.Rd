@@ -10,6 +10,7 @@ scatter(
   method = "pearson",
   threshold = 0.01,
   showLine = TRUE,
+  grid = TRUE,
   bgcol = FALSE,
   pch = 20,
   subtitle = NULL,
@@ -30,6 +31,8 @@ in order to show a colored background. Default is 0.01.}
 
 \item{showLine}{a boolean indicating if a linear regression line should be plotted. Default is
 TRUE}
+
+\item{grid}{a boolean indicating whether to show a plot grid. Default is TRUE}
 
 \item{bgcol}{Boolean. Should a background coloring associated to significance and sign of
 correlation be used? Default is TRUE, and it will color the background in red if the correlation

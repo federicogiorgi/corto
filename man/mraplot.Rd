@@ -4,7 +4,12 @@
 \alias{mraplot}
 \title{Plot a master regulator analysis}
 \usage{
-mraplot(mraobj, mrs = 5, title = "corto - Master Regulator Analysis")
+mraplot(
+  mraobj,
+  mrs = 5,
+  title = "corto - Master Regulator Analysis",
+  pthr = 0.01
+)
 }
 \arguments{
 \item{mraobj}{The input object, output of the function mra}
@@ -13,6 +18,8 @@ mraplot(mraobj, mrs = 5, title = "corto - Master Regulator Analysis")
 significance, or a character vector specifying which TFs to show. Default is 5}
 
 \item{title}{Title of the plot (optional, default is "corto - Master Regulator Analysis")}
+
+\item{pthr}{The p-value at which the MR is considered significant. Default is 0.01}
 }
 \value{
 A plot is generated

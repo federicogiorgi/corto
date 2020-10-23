@@ -262,6 +262,7 @@ kmgformat <- function(input, roundParam = 1) {
 #' in order to show a colored background. Default is 0.01.
 #' @param showLine a boolean indicating if a linear regression line should be plotted. Default is
 #' TRUE
+#' @param grid a boolean indicating whether to show a plot grid. Default is TRUE
 #' @param pch the _pch_ parameter indicating the points shape. Default is 20
 #' @param subtitle NULL by default, in which case the function will print as a subtitle the correlation
 #' coefficient (CC) and its pvalue. Otherwise, a user-provided string, bypassing the predefined subtitle
@@ -278,7 +279,7 @@ kmgformat <- function(input, roundParam = 1) {
 #' y<-setNames(rnorm(210),paste0("var",11:220))
 #' scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package")
 #' @export
-scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,bgcol=FALSE,pch=20,
+scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,grid=TRUE,bgcol=FALSE,pch=20,
                   subtitle=NULL,extendXlim=FALSE,...){
   common<-intersect(names(x),names(y))
   x<-x[common]
@@ -301,7 +302,9 @@ scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,bgcol=FALSE,
     if(ccp>threshold){bgcol<-"#FFFFFF00"}
     rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],col=bgcol)
   }
-  grid(col="gray10")
+  if(grid){
+      grid(col="gray10")
+  }
   if(showLine){
     lm1<-lm(y~x)
     abline(lm1$coef)
@@ -410,3 +413,51 @@ arena<-function(
   return(normalizedEnrichmentScore)
 }
 
+#' val2col - Convert a numeric vector into colors
+#' @param z a vector of numbers
+#' @param col1 a color name for the min value, default 'navy'
+#' @param col2 a color name for the middle value, default 'white'
+#' @param col3 a color name for the max value, default 'red3'
+#' @param nbreaks Number of colors to be generated. Default is 30.
+#' @param center boolean, should the data be centered? Default is TRUE
+#' @param rank boolean, should the data be ranked? Default is FALSE
+#' @return a vector of colors
+#' @examples
+#' a<-rnorm(1000)
+#' cols<-val2col(a)
+#' plot(a,col=cols,pch=16)
+#' @export
+val2col <- function(z, col1 = "navy", col2 = "white",
+                    col3 = "red3", nbreaks = 1000, center = TRUE,
+                    rank = FALSE) {
+  isMatrix <- FALSE
+  if (is.matrix(z)) {
+    isMatrix <- TRUE
+    oriz <- z
+  }
+  if (is.character(z)) {
+    z <- as.numeric(as.factor(z))
+  }
+  if (rank) {
+    z <- rank(z)
+  }
+  if (center) {
+    extreme = round(max(abs(z)))
+    breaks <- seq(-extreme, extreme, length = nbreaks)
+    z <- z - mean(z)
+  } else {
+    breaks <- seq(min(z), max(z), length = nbreaks)
+  }
+  ncol <- length(breaks) - 1
+  col <- gplots::colorpanel(ncol, col1, col2, col3)
+  CUT <- cut(z, breaks = breaks)
+  # assign colors to heights for each point
+  colorlevels <- col[match(CUT, levels(CUT))]
+  names(colorlevels) <- names(z)
+  if (isMatrix) {
+    colormatrix <- matrix(colorlevels, ncol = ncol(oriz), nrow = nrow(oriz))
+    dimnames(colormatrix) <- dimnames(oriz)
+    return(colormatrix)
+  }
+  return(colorlevels)
+}

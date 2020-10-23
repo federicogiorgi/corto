@@ -240,9 +240,10 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 #' @param mrs Either a numeric value indicating how many MRs to show, sorted by
 #' significance, or a character vector specifying which TFs to show. Default is 5
 #' @param title Title of the plot (optional, default is "corto - Master Regulator Analysis")
+#' @param pthr The p-value at which the MR is considered significant. Default is 0.01
 #' @return A plot is generated
 #' @export
-mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis"){
+mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis",pthr=0.01){
     # Checks ----
     if(is.numeric(mrs)){
         mrs<-names(sort(abs(mraobj$nes),decreasing=TRUE))[1:mrs]
@@ -302,19 +303,20 @@ mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis"){
     # Fill the plot with MR blocks ----
     for(mr in mrs){
         # Name of the MR
-        titplot(mr,cex=4)
+        mycex<-16*1/nchar(mr)
+        titplot(mr,cex=mycex)
 
         ### NES ----
         bgcol<-"white"
-        if(mraobj$nes[mr]>0&mraobj$pvalue[mr]<=0.01){
+        if(mraobj$nes[mr]>0&mraobj$pvalue[mr]<=pthr){
             bgcol<-"salmon"
-        } else if(mraobj$nes[mr]<0&mraobj$pvalue[mr]<=0.01){
+        } else if(mraobj$nes[mr]<0&mraobj$pvalue[mr]<=pthr){
             bgcol<-"cornflowerblue"
         }
         titplot(paste0("NES=",round(mraobj$nes[mr],2)),bgcol=bgcol)
         ### p-value ----
         bold<-FALSE
-        if(mraobj$pvalue[mr]<=0.01){bold<-TRUE}
+        if(mraobj$pvalue[mr]<=pthr){bold<-TRUE}
         titplot(paste0("p=",signif(mraobj$pvalue[mr],3)),bold=bold)
 
         ### Network ----
@@ -405,7 +407,7 @@ mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis"){
 
         ### Signature ----
         # Define Transparency for barcode plot coloring
-        if(mraobj$nes[mr]>0&mraobj$pvalue[mr]<=0.01){
+        if(mraobj$nes[mr]>0&mraobj$pvalue[mr]<=pthr){
             transp<-255*(ranksig^3)/(length(ranksig)^3)
             transp<-as.hexmode(round(transp))
             transp<-format(transp,width=2)
@@ -414,7 +416,7 @@ mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis"){
             transpinv<-as.hexmode(round(transpinv))
             transpinv<-format(transpinv,width=2)
             names(transpinv)<-names(ranksig)
-        } else if(mraobj$nes[mr]<0&mraobj$pvalue[mr]<=0.01){
+        } else if(mraobj$nes[mr]<0&mraobj$pvalue[mr]<=pthr){
             transp<-255*(ranksiginv^3)/(length(ranksiginv)^3)
             transp<-as.hexmode(round(transp))
             transp<-format(transp,width=2)

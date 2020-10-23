@@ -27,6 +27,7 @@ document()
 cat('importFrom("stats","cor","cor.test","pt","qt","setNames","var","lm","t.test","sd",
     "pchisq","ks.test", "pnorm", "qnorm", "quantile")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("utils", "setTxtProgressBar", "txtProgressBar", "relist")\n',file="NAMESPACE",append=TRUE)
+cat('importFrom("gplots", "colorpanel")\n',file="NAMESPACE",append=TRUE)
 cat('import("parallel")\n',file="NAMESPACE",append=TRUE)
 cat('import("pbapply")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("plotrix","draw.circle")\n',file="NAMESPACE",append=TRUE)
