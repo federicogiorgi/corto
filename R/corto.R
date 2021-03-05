@@ -1,6 +1,6 @@
 #' Calculate a regulon from a data matrix
 #'
-#' This function applies Spearman Correlation and DPI to generate a robust
+#' This function applies Correlation and DPI to generate a robust
 #' regulon object based on the input data matrix and the selected centroids.
 #'
 #' @param inmat Input matrix, with features (e.g. genes) as rows and samples
@@ -14,6 +14,8 @@
 #'  to be included in the final network. It can be any number between 0.0 and 1.0.
 #'  Default is 0.0.
 #' @param verbose Logical. Whether to print progress messages. Default is FALSE
+#' @param cormethod Either "spearman", "pearson", or "kendall". The correlation method used.
+#'  Default is "pearson".
 #' @param cnvmat An optional matrix with copy-number variation data. If specified, the program
 #' will calculate linear regression between the gene expression data in the input matrix (exp)
 #' and the cnv data, and target profiles will be transformed to the residuals
@@ -39,7 +41,7 @@
 #' p=1e-8)
 #' @export
 corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE,cnvmat=NULL,
-                boot_threshold=0.0){
+                boot_threshold=0.0,cormethod="pearson"){
   if(sum(is.na(inmat))>0){
     stop("Input matrix contains NA fields")
   }
@@ -109,7 +111,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
   if(verbose){
     message("Calculating pairwise correlations")
   }
-  sigedges<-fcor(inmat,centroids,r)
+  sigedges<-fcor(inmat,centroids,r,method=cormethod)
 
   # Extract all triplets TF-TF-TG
   if(verbose){
@@ -183,11 +185,11 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     set.seed(seed)
     bootmat<-inmat[,sample(colnames(inmat),replace=TRUE)]
     # Calculate correlations in the bootstrapped matrix
-    bootsigedges<-fcor(bootmat,centroids,r)
+    bootsigedges<-fcor(bootmat,centroids,r,method=cormethod)
     return(bootsigedges)
   }
   # Function to calculate correlation in bootstraps
-  fcor<-function(inmat,centroids,r){
+  fcor<-function(inmat,centroids,r,method=cormethod){
     tmat<-t(inmat)
     nfeatures<-ncol(tmat)
     features<-colnames(tmat)
@@ -196,7 +198,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     # Calculate centroid x target correlations
     cenmat<-tmat[,centroids]
     tarmat<-tmat[,targets]
-    cormat<-cor(cenmat,tarmat)
+    cormat<-cor(cenmat,tarmat,method=cormethod)
 
     # Extract significant correlations
     hits<-which(abs(cormat)>=r,arr.ind=TRUE)
