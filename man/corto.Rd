@@ -11,7 +11,8 @@ corto(
   p = 1e-30,
   nthreads = 1,
   verbose = FALSE,
-  cnvmat = NULL
+  cnvmat = NULL,
+  boot_threshold = 0
 )
 }
 \arguments{
@@ -33,6 +34,10 @@ to consider as centroids (a.k.a. Master Regulators) for DPI}
 will calculate linear regression between the gene expression data in the input matrix (exp)
 and the cnv data, and target profiles will be transformed to the residuals
 of each linear model exp~cnv. Default is NULL}
+
+\item{boot_threshold}{The fraction of bootstraps in which the edge should appear
+to be included in the final network. It can be any number between 0.0 and 1.0.
+Default is 0.0.}
 }
 \value{
 A list (object of class regulon), where each element is a centroid
@@ -43,7 +48,7 @@ A list (object of class regulon), where each element is a centroid
 }
 }
 \description{
-This function applies Spearman Correlation and DPI to generate a robust
+This function applies Correlation and DPI to generate a robust
 regulon object based on the input data matrix and the selected centroids.
 }
 \examples{
