@@ -10,6 +10,9 @@
 #' @param nbootstraps Number of bootstraps to be performed. Default is 100
 #' @param p The p-value threshold for correlation significance (by default 1E-30)
 #' @param nthreads The number of threads to use for bootstrapping. Default is 1
+#' @param boot_threshold The fraction of bootstraps in which the edge should appear
+#'  to be included in the final network. It can be any number between 0.0 and 1.0.
+#'  Default is 0.0.
 #' @param verbose Logical. Whether to print progress messages. Default is FALSE
 #' @param cnvmat An optional matrix with copy-number variation data. If specified, the program
 #' will calculate linear regression between the gene expression data in the input matrix (exp)
@@ -35,7 +38,8 @@
 #' regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=6,verbose=TRUE,cnvmat=cnvmat,
 #' p=1e-8)
 #' @export
-corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE,cnvmat=NULL){
+corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE,cnvmat=NULL,
+                boot_threshold=0.0){
   if(sum(is.na(inmat))>0){
     stop("Input matrix contains NA fields")
   }
@@ -234,7 +238,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     message("Calculating edge likelihood")
   }
   occ$likelihood<-occ$occurrences/(nbootstraps+1)
-  occ<-occ[occ$likelihood>0,]
+  occ<-occ[occ$likelihood>boot_threshold,]
 
   # Generate regulon object
   if(verbose){
