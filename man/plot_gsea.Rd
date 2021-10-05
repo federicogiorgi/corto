@@ -13,6 +13,8 @@ plot_gsea(
   bottomTitle = "List Values",
   bottomYlabel = "Signature values",
   ext_nes = NULL,
+  ext_pvalue = NULL,
+  ext_es = NULL,
   omit_middle = FALSE
 )
 }
@@ -33,6 +35,10 @@ enrichment scores}
 \item{bottomYlabel}{String for the Y label of the bottom plot}
 
 \item{ext_nes}{Provide a NES from an external calculation}
+
+\item{ext_pvalue}{Provide a pvalue from an external calculation}
+
+\item{ext_es}{Provide an ES from an external calculation}
 
 \item{omit_middle}{If TRUE, will not plot the running score
 (FALSE by default)}

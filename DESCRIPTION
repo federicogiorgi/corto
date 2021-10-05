@@ -1,7 +1,7 @@
 Package: corto
 Type: Package
 Title: Inference of Gene Regulatory Networks
-Version: 1.1.4
+Version: 1.1.9
 Authors@R: c(
  person("Federico M.","Giorgi",email = "federico.giorgi@gmail.com",role=c("aut","cre")),
  person("Daniele","Mercatelli",email = "danielemercatelli@gmail.com",role="ctb"),
@@ -21,8 +21,8 @@ Description: We present 'corto' (Correlation Tool), a simple package to infer
  Giorgi lab (2020) <doi:10.1093/bioinformatics/btaa223>.
 License: LGPL-3
 Encoding: UTF-8
-LazyData: TRUE
-RoxygenNote: 7.1.1
+LazyData: FALSE
+RoxygenNote: 7.1.2
 Depends: R (>= 3.6)
 NeedsCompilation: no
 Imports:
