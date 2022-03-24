@@ -109,6 +109,24 @@ load(system.file("extdata","cnvmat.rda",package="corto",mustWork=TRUE))
 regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRUE,cnvmat=cnvmat,p=0.01)
 ```
 
+# Applying the network to another dataset
+__corto__ provides a function, mra(), to apply a previously calculated network to another dataset, in order to predict the relative levels of the centroids from their targets, measured in a different context. This can be done in two ways. Centroids can be any numerical variable, such as Transcription Factors, or Metabolites.
+
+## Sample-by-sample centroid prediction
+The network (regulon in the example below) is directly applied to a multi-sample dataset in the form of a matrix (expmat in the example below), where columns are samples and rows are targets (e.g. transcripts). In this case, the output is a matrix with the same number of samples, including as rows the predicted centroids. The scores are intended as Normalized Enrichment Scores (NESs) over the mean value of the dataset. The NES is positive if the centroid network is higher in the sample vs the mean of the dataset, negative if lower.
+```{r mra1}
+predicted<-mra(expmat,regulon=regulon)
+```
+## Contrast centroid prediction
+As in the previous procedure, but the centroid score is provided as a differential NES between two sample groups (expmat1 and expmat2 in the example below). The resulting NES is positive if the centroid network is upregulated in expmat1 vs expmat2 (or in expmat1 vs the mean of the dataset), negative if downregulated.
+```{r mra2}
+predicted<-mra(expmat1,expmat2,regulon)
+```
+Only for the contrast version of the mra() function, a mraplot() function can be applied to the output, in order to graphically show the most differentially significant centroids in the queried contrast (figure from [16])
+```{r mra3}
+mraplot(predicted)
+```
+![Figure1](https://user-images.githubusercontent.com/1401900/159940897-4d7372d0-0a32-44b4-9269-d2fa4aa6d9af.png)
 
 
 
@@ -142,3 +160,4 @@ regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRU
 
 [15] Schubert, Michael, et al. "Gene networks in cancer are biased by aneuploidies and sample impurities." Biochimica et Biophisica Acta - Gene Regulatory Models (2019): 194444. DOI: https://doi.org/10.1016/j.bbagrm.2019.194444
 
+[16] Mercatelli, Daniele, et al. "corto: a lightweight R package for gene network inference and master regulator analysis." Bioinformatics, Vol 36, Issue 12, June 2020. DOI: https://doi.org/10.1093/bioinformatics/btaa223
