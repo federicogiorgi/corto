@@ -113,7 +113,7 @@ regulon <- corto(inmat,centroids=centroids,nthreads=2,nbootstraps=10,verbose=TRU
 __corto__ provides a function, mra(), to apply a previously calculated network to another dataset, in order to predict the relative levels of the centroids from their targets, measured in a different context. This can be done in two ways. Centroids can be any numerical variable, such as Transcription Factors, or Metabolites.
 
 ## Sample-by-sample centroid prediction
-The network (regulon in the example below) is directly applied to a multi-sample dataset in the form of a matrix (expmat in the example below), where columns are samples and rows are targets (e.g. transcripts). In this case, the output is a matrix with the same number of samples, including as rows the predicted centroids. The scores are intended as Normalized Enrichment Scores (NESs) over the mean value of the dataset. The NES is positive if the centroid network is higher in the sample vs the mean of the dataset, negative if lower.
+The network (regulon in the example below) is directly applied to a multi-sample dataset in the form of a matrix (expmat in the example below), where columns are samples and rows are targets (e.g. transcripts). In this case, the output is a matrix with the same number of samples, including as rows the predicted centroids. The scores are intended as Normalized Enrichment Scores (NESs), based on a normalized T-test for one sample vs. the rest dataset. The NES is positive if the centroid network is higher in the sample vs the mean of the dataset, negative if lower.
 ```{r mra1}
 predicted<-mra(expmat,regulon=regulon)
 ```
