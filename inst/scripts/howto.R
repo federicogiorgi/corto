@@ -37,7 +37,7 @@ cat('importFrom("dplyr", "%>%", "filter", "group_by")\n',file="NAMESPACE",append
 cat('importFrom("graphics","abline","arrows","barplot","box","grid","layout",
 "legend","lines","mtext","matlines",
 "segments","par","plot","rect","text")\n',file="NAMESPACE",append=TRUE)
-usethis::use_build_ignore(c("inst/scripts/howto.R","corto.Rproj",".Rproj.user","R/deleteme.R"))
+usethis::use_build_ignore(c("inst/scripts/howto.R","corto.Rproj",".Rproj.user","R/deleteme.R","README.md"))
 build()
 check(document=FALSE,args = c('--as-cran'))
 
