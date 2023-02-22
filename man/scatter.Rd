@@ -15,6 +15,7 @@ scatter(
   pch = 20,
   subtitle = NULL,
   extendXlim = FALSE,
+  ci = FALSE,
   ...
 )
 }
@@ -47,6 +48,9 @@ coefficient (CC) and its pvalue. Otherwise, a user-provided string, bypassing th
 \item{extendXlim}{logical. If TRUE, the x-axis limits are extended by a fraction (useful for
 labeling points on the margins of the plot area). Default is FALSE}
 
+\item{ci}{logical. If TRUE, confidence intervals of linear regression are
+shown at 95 percent confidence.}
+
 \item{...}{Arguments to be passed to the core _plot_ function}
 }
 \value{
@@ -61,5 +65,5 @@ if the correlation is positive (red), negative
 \examples{
 x<-setNames(rnorm(200),paste0("var",1:200))
 y<-setNames(rnorm(210),paste0("var",11:220))
-scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package")
+scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package",ci=TRUE)
 }

@@ -272,44 +272,99 @@ kmgformat <- function(input, roundParam = 1) {
 #' correlation be used? Default is TRUE, and it will color the background in red if the correlation
 #' coefficient is positive, in blue if negative, in white if not significant (accordin to the
 #' _threshold_ parameter)
+#' @param ci logical. If TRUE, confidence intervals of linear regression are
+#' shown at 95 percent confidence.
 #' @param ... Arguments to be passed to the core _plot_ function
 #' @return A plot
 #' @examples
 #' x<-setNames(rnorm(200),paste0("var",1:200))
 #' y<-setNames(rnorm(210),paste0("var",11:220))
-#' scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package")
+#' scatter(x,y,xlab="Variable x",ylab="Variable y",main="Scatter plot by corto package",ci=TRUE)
 #' @export
 scatter<-function(x,y,method="pearson",threshold=0.01,showLine=TRUE,grid=TRUE,bgcol=FALSE,pch=20,
-                  subtitle=NULL,extendXlim=FALSE,...){
-  common<-intersect(names(x),names(y))
-  x<-x[common]
-  y<-y[common]
-  if(!extendXlim){
-    plot(x,y,pch=pch,...)
-  }else{
-    plot(x,y,pch=pch,xlim=1.2*c(min(x),max(x)),...)
-  }
-  cc<-cor.test(x,y,method=method)
-  ccp<-signif(cc$p.value,3)
-  cccor<-signif(cc$estimate,3)
-  if(is.null(subtitle)){
-    mtext(paste0("CC=",cccor," (p=",ccp,")"),cex=0.7)
-  } else {
-    mtext(subtitle,cex=0.7)
-  }
-  if(bgcol){
-    if(cccor>=0){bgcol<-"#FF000033"}else{bgcol<-"#0000FF33"}
-    if(ccp>threshold){bgcol<-"#FFFFFF00"}
-    rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],col=bgcol)
-  }
-  if(grid){
-      grid(col="gray10")
-  }
-  if(showLine){
-    lm1<-lm(y~x)
-    abline(lm1$coef)
-  }
+                  subtitle=NULL,extendXlim=FALSE,ci=FALSE,...){
+    common<-intersect(names(x),names(y))
+    x<-x[common]
+    y<-y[common]
+    if(!extendXlim){
+        plot(x,y,pch=pch,...)
+    }else{
+        plot(x,y,pch=pch,xlim=1.2*c(min(x),max(x)),...)
+    }
+    cc<-cor.test(x,y,method=method)
+    ccp<-signif(cc$p.value,3)
+    cccor<-signif(cc$estimate,3)
+    if(is.null(subtitle)){
+        if(ccp<0.01){
+            vv<-format(ccp,scientific=TRUE)
+            v1<-gsub("e.+","",vv)
+            v2<-gsub(".+e","",vv)
+            v2<-gsub("-0+","-",v2)
+            v2<-gsub("\\+0","+",v2)
+            v2<-gsub("\\++","",v2)
+            bq<-as.expression(bquote("CC="~.(cccor)~" (p="~.(v1)~x~10^.(v2)~")"))
+        } else{
+            bq<-mtext(paste0("CC=",cccor," (p=",ccp,")"),cex=0.7)
+        }
+        mtext(bq,cex=0.7)
+    } else {
+        mtext(subtitle,cex=0.7)
+    }
+    if(bgcol){
+        if(cccor>=0){bgcol<-"#FF000033"}else{bgcol<-"#0000FF33"}
+        if(ccp>threshold){bgcol<-"#FFFFFF00"}
+        rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],col=bgcol)
+    }
+    if(grid){
+        grid(col="gray10")
+    }
+    if(showLine){
+        lm1<-lm(y~x)
+        abline(lm1$coef)
+    }
+    if(ci){
+        lm2<-lm(y~x)
+        newx=data.frame(x=seq(min(x),max(x),length.out=length(x)))
+        confInterval=predict(lm2,newdata=data.frame(x=newx),interval='confidence',level=0.95)
+        matlines(newx$x,confInterval[,2:3],col='dodgerblue1',lty=2)
+    }
 }
+
+#' scinot - Convert a number to a scientific notation expression
+#'
+#' This function will convert any numeric vector
+#'
+#' @param v The input numeric object. It can be a single value or a vector
+#' @param digits An integer indicating how many significant digits to show. Default is 3.
+#' @return An object of class _expression_.
+#' @examples
+#' # Usage on single value
+#' scinot(0.00000543)
+#' # Demonstration on a vector
+#' numbers<-c(3.456e-12,0.00901,5670000,-3.16e18,0.000004522,rnorm(5,sd=0.0000001))
+#' plot(0,xlim=c(0,10),ylim=c(0,10),type="n")
+#' text(c(2,6),c(10,10),labels=c("Before","After"),font=2)
+#' for(i in 10:1){
+#'     text(c(2,6),c(i-1,i-1),labels=c(numbers[i],scinot(numbers)[i]))
+#' }
+#' @export
+scinot<-function(v,digits=3){
+    v<-signif(v,digits)
+    vv<-format(v,scientific=TRUE)
+    v1<-gsub("e.+","",vv)
+    v2<-gsub(".+e","",vv)
+    v2<-gsub("-0+","-",v2)
+    v2<-gsub("\\+0","+",v2)
+    v2<-gsub("\\++","",v2)
+
+    vexpr<-vector("expression",length(v))
+    for(i in 1:length(vv)){
+        bq<-as.expression(bquote(.(v1[i])~x~10^.(v2[i])))
+        vexpr[i]<-bq
+    }
+    return(vexpr)
+}
+
 
 
 ### Arena: Advanced Rank ENrichment Analysis
@@ -461,3 +516,29 @@ val2col <- function(z, col1 = "navy", col2 = "white",
   }
   return(colorlevels)
 }
+
+
+#' barplot2 - Bar plot with error bars
+#' @param values A matrix of values
+#' @param errors A matrix of values for upper error bar
+#' @param ... Arguments to be passed to the core _barplot_ function
+#' @return A plot
+#' @examples
+#' values<-matrix(rnorm(10*4,mean=10),nrow=4,ncol=10)
+#' errors<-matrix(runif(10*4),nrow=4,ncol=10)
+#' colnames(values)<-colnames(errors)<-LETTERS[1:10]
+#' barplot2(values,errors,main="Bar plot with error bars")
+#' @export
+barplot2<-function(values,errors,...){
+  sums<-values+errors
+  bp<-barplot(values,beside=TRUE,ylim=c(0,1.1*max(sums)),...)
+  for(i in 1:nrow(bp)){
+    for(j in 1:ncol(bp)){
+      pos<-bp[i,j]
+      m<-values[i,j]
+      s<-errors[i,j]
+      arrows(pos,m+s,pos,m,angle=90,code=3,lwd=2,length=0.06)
+    }
+  }
+}
+

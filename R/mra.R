@@ -44,6 +44,8 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
         }
     }
 
+
+
     # Filter by minsize
     regsizes<-sapply(regulon,function(x){length(x$likelihood)})
     regulon<-regulon[regsizes>=minsize]
@@ -67,6 +69,24 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 
     # Case 1: expmat2 is provided as control
     if(!is.null(expmat2)){
+        # Check for zero-variance genes
+        vargenes<-apply(expmat1,1,var)
+        expmat11<-expmat1[which(vargenes>0),]
+        rm(vargenes)
+        vargenes<-apply(expmat2,1,var)
+        expmat22<-expmat2[which(vargenes>0),]
+        rm(vargenes)
+        if(nrow(expmat11)<nrow(expmat1)){
+            message("Removed ",nrow(expmat1)-nrow(expmat11)," rows with zero variance")
+        }
+        if(nrow(expmat22)<nrow(expmat2)){
+            message("Removed ",nrow(expmat2)-nrow(expmat22)," rows with zero variance")
+        }
+        common<-intersect(rownames(expmat11),rownames(expmat22))
+        expmat1<-expmat11[common,]
+        expmat2<-expmat22[common,]
+        rm(expmat11,expmat22)
+
         # We create a signature
         sig<-setNames(apply(cbind(expmat1,expmat2),1,function(x){
             x1<-x[1:ncol(expmat1)]

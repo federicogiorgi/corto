@@ -101,7 +101,7 @@ gsea <- function(reflist,
         null_es<-null_gsea(set=set,reflist=reflist,np=np,w=w)
     } else{
         ### If a null list is provided, use it
-        if(class(gsea_null)=="gsea_nullist"){
+        if(is(gsea_null,"gsea_nullist")){
             null_es<-gsea_null[as.character(length(set))][[1]]
         }else{
             null_es<-gsea_null
