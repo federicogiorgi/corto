@@ -25,7 +25,7 @@ unlink("NAMESPACE")
 document()
 # use_vignette("corto_vignette")
 cat('importFrom("stats","cor","cor.test","pt","qt","setNames","var","lm","t.test","sd",
-    "pchisq","ks.test","pnorm","qnorm","quantile","predict")\n',
+    "pchisq","ks.test","pnorm","qnorm","quantile","predict","runif")\n',
     file="NAMESPACE",append=TRUE)
 cat('importFrom("utils", "setTxtProgressBar", "txtProgressBar", "relist")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("gplots", "colorpanel")\n',file="NAMESPACE",append=TRUE)
@@ -35,7 +35,7 @@ cat('importFrom("methods", "is")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("plotrix","draw.circle")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("dplyr", "%>%", "filter", "group_by")\n',file="NAMESPACE",append=TRUE)
 cat('importFrom("graphics","abline","arrows","barplot","box","grid","layout",
-"legend","lines","mtext","matlines",
+"legend","lines","mtext","matlines","points", "strheight", "strwidth",
 "segments","par","plot","rect","text")\n',file="NAMESPACE",append=TRUE)
 usethis::use_build_ignore(c("inst/scripts/howto.R","corto.Rproj",".Rproj.user","R/deleteme.R","README.md"))
 build()

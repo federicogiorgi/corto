@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{barplot2}
 \alias{barplot2}
-\title{barplot2 - Bar plot with error bars}
+\title{barplot2 - Bar plot with upper error bars}
 \usage{
 barplot2(values, errors, ...)
 }
@@ -17,7 +17,7 @@ barplot2(values, errors, ...)
 A plot
 }
 \description{
-barplot2 - Bar plot with error bars
+barplot2 - Bar plot with upper error bars
 }
 \examples{
 values<-matrix(rnorm(10*4,mean=10),nrow=4,ncol=10)

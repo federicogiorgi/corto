@@ -51,7 +51,7 @@ labeling points on the margins of the plot area). Default is FALSE}
 \item{ci}{logical. If TRUE, confidence intervals of linear regression are
 shown at 95 percent confidence.}
 
-\item{...}{Arguments to be passed to the core _plot_ function}
+\item{...}{Arguments to be passed to the core _plot_ function (if a new plot is created)}
 }
 \value{
 A plot

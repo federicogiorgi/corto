@@ -274,7 +274,7 @@ kmgformat <- function(input, roundParam = 1) {
 #' _threshold_ parameter)
 #' @param ci logical. If TRUE, confidence intervals of linear regression are
 #' shown at 95 percent confidence.
-#' @param ... Arguments to be passed to the core _plot_ function
+#' @param ... Arguments to be passed to the core _plot_ function (if a new plot is created)
 #' @return A plot
 #' @examples
 #' x<-setNames(rnorm(200),paste0("var",1:200))
@@ -518,7 +518,7 @@ val2col <- function(z, col1 = "navy", col2 = "white",
 }
 
 
-#' barplot2 - Bar plot with error bars
+#' barplot2 - Bar plot with upper error bars
 #' @param values A matrix of values
 #' @param errors A matrix of values for upper error bar
 #' @param ... Arguments to be passed to the core _barplot_ function
@@ -540,5 +540,189 @@ barplot2<-function(values,errors,...){
       arrows(pos,m+s,pos,m,angle=90,code=3,lwd=2,length=0.06)
     }
   }
+}
+
+# Function boxOverlap (needed for textrepel)
+boxOverlap<-function(x1,y1,sw1,sh1,boxes){
+    overlap<-TRUE
+    i<-0
+    while(i<length(boxes)){
+        i<-i+1
+        vertices<-boxes[[i]]
+        x2<-vertices[1]
+        y2<-vertices[2]
+        sw2<-vertices[3]
+        sh2<-vertices[4]
+        if(x1<x2){
+            overlap<-(x1+sw1)>x2
+        }else{
+            overlap<-(x2+sw2)>x1
+        }
+        if(y1<y2){
+            overlap<-(overlap&&((y1+sh1)>y2))
+        } else {
+            overlap<-(overlap&&((y2+sh2)>y1))
+        }
+        if(overlap){
+            return(TRUE)
+        }
+    }
+    return(FALSE)
+}
+
+
+#' textrepel - Plot text with non-overlapping labels
+#'
+#' This function plots text with x and y coordinates, forcing overlapping labels to not overlap
+#'
+#' @param x A numeric vector of x coordinates
+#' @param y A numeric vector of y coordinates (must have the same length of x)
+#' @param labels A vector of labels associated with x and y (must have the same length of x)
+#' @param padding A character object specifying left and right padding for words. Default is a
+#' single whitespace " "
+#' @param rstep Decimal numeric specifying the lateral step length for label distancing.
+#' Default is 0.1
+#' @param tstep Decimal numeric specifying the theta step length for label distancing.
+#' Default is 0.1
+#' @param vertical Boolean. If FALSE (default), the labels are plotted horizontally. If TRUE,
+#' vertically
+#' @param textSize Numeric. Size of text. Default is 1
+#' @param showLines Boolean. Whether to show lines connecting displaced labels to their original
+#' plot. Default is TRUE
+#' @param lineColor String indicating the color of the connecting line
+#' @param lineWidth Numeric indicating the width of the connecting line
+#' @param showPoints Boolean. Whether to show points over original x-y coordinates
+#' @param pointColor String indicating the color of the point
+#' @param pointSize Numeric indicating the size of the point
+#' @param pointPch Integer applying to shape of points. Default is 16 (filled circle)
+#' @param add Boolean. If FALSE (default), a new plot is generated. If TRUE, the textrepel labels
+#' are plotted over the existing plot
+#' @param ... Arguments to be passed to the core _plot_ function
+#' @return A plot
+#' @examples
+#' # Simple example, generating a new plot, taking care of some overlapping labels
+#' set.seed(1)
+#' x<-rnorm(100)
+#' y<-abs(x)+rnorm(100)
+#' names(x)<-names(y)<-paste0("OBJ",1:length(x))
+#' labels<-names(x)
+#' textrepel(x,y,labels)
+#' # More advanced example, adding textrepel over an existing plot
+#' set.seed(1)
+#' x<-rnorm(1000)
+#' y<-abs(x)+rnorm(1000)
+#' names(x)<-names(y)<-paste0("GENE",1:length(x))
+#' labels<-names(x)
+#' plot(x,y,pch=16,col="#00000066",xlim=1.3*c(min(x),max(x)))
+#' subset1<-which(x<(-2.2))
+#' textrepel(x[subset1],y[subset1],labels[subset1],add=TRUE,pointCol="cornflowerblue")
+#' subset2<-which(x>(+2.2))
+#' textrepel(x[subset2],y[subset2],labels[subset2],add=TRUE,pointCol="salmon")
+
+
+#' @export
+textrepel<-function(x,y,
+                    labels=NULL,
+                    padding=" ",
+                    rstep=0.1,
+                    tstep=0.1,
+                    vertical=FALSE,
+                    textSize=1,
+                    showLines=TRUE,
+                    lineColor="#00000066",
+                    lineWidth=2,
+                    showPoints=TRUE,
+                    pointColor="#00000033",
+                    pointSize=2,
+                    pointPch=16,
+                    add=FALSE,
+                    ...
+){
+    # Sanity check
+    if((length(x)!=length(y))|(length(x)!=length(labels))){
+        stop("Length of x, y and labels differ!")
+    }
+
+    # Limit parameters
+    xLimits<-c(-Inf,Inf)
+    yLimits<-c(-Inf,Inf)
+
+    # Create new plot, if necessary
+    if(!add) {
+        plot(x,y,type="n",...)
+    }
+
+    # Add padding
+    labels<-paste0(padding,labels,padding)
+
+    # Define which letters are especially tall
+    peculiarLetters<-"g|j|p|q|y"
+    n<-length(labels)
+    sdx<-sd(x,na.rm=TRUE)
+    sdy<-sd(y,na.rm=TRUE)
+    if(length(textSize)==1){textSize<-rep(textSize,n)}
+    if(length(vertical)==1){vertical<-rep(vertical, n)}
+
+    # The boxes loop part
+    boxes<-list()
+    for (i in 1:length(labels)) {
+        rotLabel<-vertical[i]
+        r<-0
+        theta<-runif(1,0,2*pi)
+        x1<-x0<-x[i]
+        y1<-y0<-y[i]
+        wid<-strwidth(labels[i],cex=textSize[i])
+        ht<-1.2*strheight(labels[i],cex=textSize[i])
+        # Increase height when peculiar letters are present
+        if (grepl(peculiarLetters,labels[i])){
+            ht<-ht+ht*0.2
+        }
+        if (rotLabel){
+            tmp<-ht
+            ht<-wid
+            wid<-tmp
+        }
+        isBoxOverlapped<-TRUE
+        while(isBoxOverlapped){
+            if (!boxOverlap(x1-0.5*wid,y1-0.5*ht,wid,ht,boxes)&&
+                (x1-0.5*wid>xLimits[1]&&y1-0.5*ht>yLimits[1])&&
+                (x1+0.5*wid<xLimits[2]&&y1+0.5*ht<yLimits[2])) {
+                boxes[[length(boxes)+1]]<-c(x1-0.5*wid,y1-0.5*ht,wid,ht)
+                isBoxOverlapped<-FALSE
+            } else{
+                theta<-theta+tstep
+                r<-r+rstep*tstep/(2*pi)
+                x1<-x0+sdx*r*cos(theta)
+                y1<-y0+sdy*r*sin(theta)
+            }
+        }
+    }
+    output<-do.call(rbind,boxes)
+    colnames(output)<-c("x","y","width","ht")
+    rownames(output)<-labels
+    coords<-output
+
+
+    # Back to plotting
+    if(showLines) {
+        for (i in seq_len(length(x))){
+            xl<-coords[i,1]
+            yl<-coords[i,2]
+            w<-coords[i,3]
+            h<-coords[i,4]
+            if(showPoints){
+                points(x[i],y[i],pch=pointPch,col=pointColor,cex=pointSize)
+            }
+            if(x[i]<xl||x[i]>xl+w||y[i]<yl||y[i]>yl+h){
+                nx<-xl+0.5*w
+                ny<-yl+0.5*h
+                lines(c(x[i],nx),c(y[i],ny),col=lineColor,lwd=lineWidth)
+            }
+        }
+    }
+    for(i in 1:nrow(coords)){
+        text(coords[i,1]+0.5*coords[i,3],coords[i,2]+0.5*coords[i,4],labels[i],cex=textSize[i],
+             srt=vertical[i]*90,font=2)
+    }
 }
 

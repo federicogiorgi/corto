@@ -1,17 +1,16 @@
-citHeader("Please, cite the following reference:")
-
-citEntry(entry="article",
+bibentry(bibtype="article",
 	author=c(
 	    person("Daniele","Mercatelli"),
-	    person(c("Federico","M"), "Giorgi")
+	    person("Gonzalo","Lopez-Garcia"),
+		person(c("Federico","M"), "Giorgi")
 	),
-	title = "Correlation Tool (CorTo): a simple R package to infer correlation networks using Data Processing Inequality (DPI)",
-	journal = "BiorXiv",
+	title = "corto: a lightweight R package for gene network inference and master regulator analysis",
+	journal = "Bioinformatics",
 	year = 2020,
-	volume = 1,
-	number = 1,
-	pages = "123-124",
-
-	textVersion = "Mercatelli, D. and Giorgi, F.M. (2020) Correlation Tool (CorTo): a simple R package to infer correlation networks using Data Processing Inequality (DPI)"
+	month = 06,
+	volume = 36,
+	number = 12,
+	pages = "3916-3917",
+	doi= "10.1093/bioinformatics/btaa223",
+	textVersion = "Mercatelli, D., Lopez-Garcia G. and Giorgi, F.M. (2020) corto: a lightweight R package for gene network inference and master regulator analysis"
 )
-
