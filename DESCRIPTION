@@ -28,9 +28,11 @@ NeedsCompilation: no
 Imports:
  dplyr,
  gplots,
+ knitr,
  methods,
  parallel,
  pbapply,
  plotrix,
  stats,
  utils
+VignetteBuilder: knitr
