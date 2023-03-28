@@ -1,39 +1,39 @@
 # Max of absolute value
 maxabs<-function(x){
-  max(abs(x))
+    max(abs(x))
 }
 
 # Function to extract correlation indeces
 extract<-function(mat,x,y){
-  mat[x+nrow(mat)*(y-1)]
+    mat[x+nrow(mat)*(y-1)]
 }
 
 # Function to process combos
 funcombos<-function(inp,tmat,groups,r){
 
-  i<-inp[1]
-  j<-inp[2]
-  submat1<-tmat[,groups[[i]]]
-  submat2<-tmat[,groups[[j]]]
-  cormat<-cor(submat1,submat2)
+    i<-inp[1]
+    j<-inp[2]
+    submat1<-tmat[,groups[[i]]]
+    submat2<-tmat[,groups[[j]]]
+    cormat<-cor(submat1,submat2)
 
-  # Fix problem with symmetrical quadrants
-  if(i==j){
-    cormat[lower.tri(cormat,diag=TRUE)]<-0
-  }
+    # Fix problem with symmetrical quadrants
+    if(i==j){
+        cormat[lower.tri(cormat,diag=TRUE)]<-0
+    }
 
-  # Extract significant correlations
-  hits<-which(abs(cormat)>=r,arr.ind=TRUE)
-  rowhits<-rownames(cormat)[hits[,1]]
-  colhits<-colnames(cormat)[hits[,2]]
+    # Extract significant correlations
+    hits<-which(abs(cormat)>=r,arr.ind=TRUE)
+    rowhits<-rownames(cormat)[hits[,1]]
+    colhits<-colnames(cormat)[hits[,2]]
 
-  # Extract correlation indeces
-  corhits<-cormat[hits[,1]+nrow(cormat)*(hits[,2]-1)]
+    # Extract correlation indeces
+    corhits<-cormat[hits[,1]+nrow(cormat)*(hits[,2]-1)]
 
-  # Results
-  results<-as.data.frame(cbind(rowhits,colhits,corhits))
+    # Results
+    results<-as.data.frame(cbind(rowhits,colhits,corhits))
 
-  return(results)
+    return(results)
 }
 
 
@@ -82,28 +82,28 @@ funcombos<-function(inp,tmat,groups,r){
 #' @return A matrix describing which edges were significant in the input matrix
 #' matrix according to the r correlation threshold provided
 fcor<-function(inmat,centroids,r){
-  tmat<-t(inmat)
-  nfeatures<-ncol(tmat)
-  features<-colnames(tmat)
-  targets<-setdiff(features,centroids)
+    tmat<-t(inmat)
+    nfeatures<-ncol(tmat)
+    features<-colnames(tmat)
+    targets<-setdiff(features,centroids)
 
-  # Calculate centroid x target correlations
-  cenmat<-tmat[,centroids]
-  tarmat<-tmat[,targets]
-  cormat<-cor(cenmat,tarmat)
+    # Calculate centroid x target correlations
+    cenmat<-tmat[,centroids]
+    tarmat<-tmat[,targets]
+    cormat<-cor(cenmat,tarmat)
 
-  # Extract significant correlations
-  hits<-which(abs(cormat)>=r,arr.ind=TRUE)
-  rowhits<-rownames(cormat)[hits[,1]]
-  colhits<-colnames(cormat)[hits[,2]]
+    # Extract significant correlations
+    hits<-which(abs(cormat)>=r,arr.ind=TRUE)
+    rowhits<-rownames(cormat)[hits[,1]]
+    colhits<-colnames(cormat)[hits[,2]]
 
-  # Extract correlation indeces
-  corhits<-cormat[hits[,1]+nrow(cormat)*(hits[,2]-1)]
+    # Extract correlation indeces
+    corhits<-cormat[hits[,1]+nrow(cormat)*(hits[,2]-1)]
 
-  # Results
-  sigedges<-as.data.frame(cbind(rowhits,colhits,corhits))
+    # Results
+    sigedges<-as.data.frame(cbind(rowhits,colhits,corhits))
 
-  return(sigedges)
+    return(sigedges)
 }
 
 # #' Function to bootstrap matrix
@@ -167,9 +167,9 @@ fcor<-function(inmat,centroids,r){
 #' r2p(r=0.4,n=20) # 0.08
 #' @export
 r2p<-function(r,n){
-  t<-(r*sqrt(n-2)) / sqrt(1-(r^2))
-  p<-2*pt(t,df=n-2,lower.tail=FALSE)
-  return(p)
+    t<-(r*sqrt(n-2)) / sqrt(1-(r^2))
+    p<-2*pt(t,df=n-2,lower.tail=FALSE)
+    return(p)
 }
 
 #' p2r Convert a P-value to the corresponding Correlation Coefficient
@@ -180,9 +180,9 @@ r2p<-function(r,n){
 #' p2r(p=0.08,n=20)
 #' @export
 p2r<-function(p,n){
-  t<-qt(p/2,df=n-2,lower.tail=FALSE)
-  r<-sqrt((t^2)/(n-2+t^2))
-  return(r)
+    t<-qt(p/2,df=n-2,lower.tail=FALSE)
+    r<-sqrt((t^2)/(n-2+t^2))
+    return(r)
 }
 
 
@@ -210,41 +210,41 @@ p2r<-function(p,n){
 #' axis(2,at=pretty(a),labels=kmg)
 #' @export
 kmgformat <- function(input, roundParam = 1) {
-  signs <- sign(input)
-  signs[signs == 1] <- ""
-  signs[signs == -1] <- "-"
-  signs[signs == 0] <- ""
-  absinput <- abs(input)
-  output <- c()
-  for (i in absinput) {
-    if (i < 1000) {
-      output <- c(output, i)
-    } else if (i < 1e+06) {
-      i <- round(i/1000, roundParam)
-      i <- paste0(i, "K")
-      output <- c(output, i)
-    } else if (i < 1e+09) {
-      i <- round(i/1e+06, roundParam)
-      i <- paste0(i, "M")
-      output <- c(output, i)
-    } else if (i < 1e+12) {
-      i <- round(i/1e+09, roundParam)
-      i <- paste0(i, "G")
-      output <- c(output, i)
-    } else if (i < 1e+15) {
-      i <- round(i/1e+12, roundParam)
-      i <- paste0(i, "T")
-      output <- c(output, i)
-    } else if (i < 1e+18) {
-      i <- round(i/1e+15, roundParam)
-      i <- paste0(i, "P")
-      output <- c(output, i)
-    } else {
-      output <- c(output, i)
+    signs <- sign(input)
+    signs[signs == 1] <- ""
+    signs[signs == -1] <- "-"
+    signs[signs == 0] <- ""
+    absinput <- abs(input)
+    output <- c()
+    for (i in absinput) {
+        if (i < 1000) {
+            output <- c(output, i)
+        } else if (i < 1e+06) {
+            i <- round(i/1000, roundParam)
+            i <- paste0(i, "K")
+            output <- c(output, i)
+        } else if (i < 1e+09) {
+            i <- round(i/1e+06, roundParam)
+            i <- paste0(i, "M")
+            output <- c(output, i)
+        } else if (i < 1e+12) {
+            i <- round(i/1e+09, roundParam)
+            i <- paste0(i, "G")
+            output <- c(output, i)
+        } else if (i < 1e+15) {
+            i <- round(i/1e+12, roundParam)
+            i <- paste0(i, "T")
+            output <- c(output, i)
+        } else if (i < 1e+18) {
+            i <- round(i/1e+15, roundParam)
+            i <- paste0(i, "P")
+            output <- c(output, i)
+        } else {
+            output <- c(output, i)
+        }
     }
-  }
-  output <- paste0(signs, output)
-  return(output)
+    output <- paste0(signs, output)
+    return(output)
 }
 
 #' scatter - XY scatter plot with extra information
@@ -369,103 +369,103 @@ scinot<-function(v,digits=3){
 
 ### Arena: Advanced Rank ENrichment Analysis
 arena<-function(
-  signatures,
-  groups,
-  sweights=NULL,
-  gweights=NULL,
-  minsize=1
+        signatures,
+        groups,
+        sweights=NULL,
+        gweights=NULL,
+        minsize=1
 ){
-  ### Convert to list if groups are not a list
-  if(!is.list(groups)){
-    groups<-apply(groups,1,function(x){
-      hits<-colnames(groups)[x==1]
-      return(hits)
+    ### Convert to list if groups are not a list
+    if(!is.list(groups)){
+        groups<-apply(groups,1,function(x){
+            hits<-colnames(groups)[x==1]
+            return(hits)
+        })
+    }
+
+    ### Remove from groups what is not in signature matrix
+    features<-rownames(signatures)
+    groups<-lapply(groups,function(x){
+        y<-intersect(x,features)
+        return(y)
     })
-  }
 
-  ### Remove from groups what is not in signature matrix
-  features<-rownames(signatures)
-  groups<-lapply(groups,function(x){
-    y<-intersect(x,features)
-    return(y)
-  })
+    ### Remove small groups
+    groups<-groups[sapply(groups,length)>=minsize]
 
-  ### Remove small groups
-  groups<-groups[sapply(groups,length)>=minsize]
-
-  ### Treat single "signature"
-  if (is.null(nrow(signatures))){
-    signatures <- matrix(signatures, length(signatures), 1, dimnames=list(names(signatures), "sample1"))
-  }
+    ### Treat single "signature"
+    if (is.null(nrow(signatures))){
+        signatures <- matrix(signatures, length(signatures), 1, dimnames=list(names(signatures), "sample1"))
+    }
 
 
-  ### Generate dummy signature weights
-  if(is.null(sweights)){
-    sweights<-matrix(1,nrow=nrow(signatures),ncol=ncol(signatures))
-    dimnames(sweights)<-dimnames(signatures)
-  }
-  if(!identical(dim(signatures), dim(sweights))){
-    stop("Signatures and Signature weights must be matrices of identical size")
-  }
+    ### Generate dummy signature weights
+    if(is.null(sweights)){
+        sweights<-matrix(1,nrow=nrow(signatures),ncol=ncol(signatures))
+        dimnames(sweights)<-dimnames(signatures)
+    }
+    if(!identical(dim(signatures), dim(sweights))){
+        stop("Signatures and Signature weights must be matrices of identical size")
+    }
 
-  ### Generate dummy group weights
-  if(is.null(gweights)){
-    gweights<-relist(rep(1,sum(sapply(groups,length))),skeleton=groups)
-  }
+    ### Generate dummy group weights
+    if(is.null(gweights)){
+        gweights<-relist(rep(1,sum(sapply(groups,length))),skeleton=groups)
+    }
 
-  ### Apply weights to group belonging
-  wgroups<-gweights
-  for(i in 1:length(wgroups)){
-    names(wgroups[[i]])<-groups[[i]]
-  }
-  rm(gweights)
+    ### Apply weights to group belonging
+    wgroups<-gweights
+    for(i in 1:length(wgroups)){
+        names(wgroups[[i]])<-groups[[i]]
+    }
+    rm(gweights)
 
-  ### Rank-transform columns
-  ranks<-apply(signatures,2,rank,na.last="keep")
-  ### Assign a 0 to signature weights where the signature was NA
-  sweights[is.na(ranks)]<-0
-  ### 0-1 bound ranks
-  boundranks<-t(t(ranks)/(colSums(!is.na(signatures))+1))
-  ### Treat bound ranks as quantiles in a gaussian distribution (0=-Inf, 1=+Inf)
-  gaussian <- qnorm(boundranks)
-  ### Deal with NAs
-  gaussian[is.na(gaussian)]<-0
+    ### Rank-transform columns
+    ranks<-apply(signatures,2,rank,na.last="keep")
+    ### Assign a 0 to signature weights where the signature was NA
+    sweights[is.na(ranks)]<-0
+    ### 0-1 bound ranks
+    boundranks<-t(t(ranks)/(colSums(!is.na(signatures))+1))
+    ### Treat bound ranks as quantiles in a gaussian distribution (0=-Inf, 1=+Inf)
+    gaussian <- qnorm(boundranks)
+    ### Deal with NAs
+    gaussian[is.na(gaussian)]<-0
 
-  ### Apply signature weights to the normalized distribution
-  gaussian<-gaussian*sweights
+    ### Apply signature weights to the normalized distribution
+    gaussian<-gaussian*sweights
 
 
-  ### Next, we see how each of the groups are behaving in these normalized signatures
-  ### Create a boolean matrix with ngroup columns and signaturelength rows, indicating the matches
-  matches <- sapply(wgroups, function(group, allElements) {
-    hereMatches<-as.integer(allElements%in%names(group))
-    names(hereMatches)<-allElements
-    # Weigth by group belonging
-    weightedMatches<-hereMatches
-    weightedMatches[names(group)]<-weightedMatches[names(group)]*group
-    return(weightedMatches)
-  }, allElements=rownames(gaussian))
-  # And then transpose it
-  matches<-t(matches)
-  colnames(matches)<-rownames(signatures)
+    ### Next, we see how each of the groups are behaving in these normalized signatures
+    ### Create a boolean matrix with ngroup columns and signaturelength rows, indicating the matches
+    matches <- sapply(wgroups, function(group, allElements) {
+        hereMatches<-as.integer(allElements%in%names(group))
+        names(hereMatches)<-allElements
+        # Weigth by group belonging
+        weightedMatches<-hereMatches
+        weightedMatches[names(group)]<-weightedMatches[names(group)]*group
+        return(weightedMatches)
+    }, allElements=rownames(gaussian))
+    # And then transpose it
+    matches<-t(matches)
+    colnames(matches)<-rownames(signatures)
 
-  # Number of matches per group
-  groupmatches <- rowSums(matches)
+    # Number of matches per group
+    groupmatches <- rowSums(matches)
 
-  # Relative part of the signature that matches
-  relativematches<-matches/groupmatches
+    # Relative part of the signature that matches
+    relativematches<-matches/groupmatches
 
-  # This trick will overweight massively small groups with all their components highly-ranked.
-  # Extreme case is with a group with one gene at the top
+    # This trick will overweight massively small groups with all their components highly-ranked.
+    # Extreme case is with a group with one gene at the top
 
-  # The core linear algebra operation. The true magic of rea
-  enrichmentScore <- relativematches %*% gaussian
+    # The core linear algebra operation. The true magic of rea
+    enrichmentScore <- relativematches %*% gaussian
 
-  # Finally, every enrichment is square-rooted to respect the criterion of normality
-  normalizedEnrichmentScore<-enrichmentScore*sqrt(groupmatches)
+    # Finally, every enrichment is square-rooted to respect the criterion of normality
+    normalizedEnrichmentScore<-enrichmentScore*sqrt(groupmatches)
 
-  # Return output
-  return(normalizedEnrichmentScore)
+    # Return output
+    return(normalizedEnrichmentScore)
 }
 
 #' val2col - Convert a numeric vector into colors
@@ -485,36 +485,36 @@ arena<-function(
 val2col <- function(z, col1 = "navy", col2 = "white",
                     col3 = "red3", nbreaks = 1000, center = TRUE,
                     rank = FALSE) {
-  isMatrix <- FALSE
-  if (is.matrix(z)) {
-    isMatrix <- TRUE
-    oriz <- z
-  }
-  if (is.character(z)) {
-    z <- as.numeric(as.factor(z))
-  }
-  if (rank) {
-    z <- rank(z)
-  }
-  if (center) {
-    extreme = round(max(abs(z)))
-    breaks <- seq(-extreme, extreme, length = nbreaks)
-    z <- z - mean(z)
-  } else {
-    breaks <- seq(min(z), max(z), length = nbreaks)
-  }
-  ncol <- length(breaks) - 1
-  col <- gplots::colorpanel(ncol, col1, col2, col3)
-  CUT <- cut(z, breaks = breaks)
-  # assign colors to heights for each point
-  colorlevels <- col[match(CUT, levels(CUT))]
-  names(colorlevels) <- names(z)
-  if (isMatrix) {
-    colormatrix <- matrix(colorlevels, ncol = ncol(oriz), nrow = nrow(oriz))
-    dimnames(colormatrix) <- dimnames(oriz)
-    return(colormatrix)
-  }
-  return(colorlevels)
+    isMatrix <- FALSE
+    if (is.matrix(z)) {
+        isMatrix <- TRUE
+        oriz <- z
+    }
+    if (is.character(z)) {
+        z <- as.numeric(as.factor(z))
+    }
+    if (rank) {
+        z <- rank(z)
+    }
+    if (center) {
+        extreme = round(max(abs(z)))
+        breaks <- seq(-extreme, extreme, length = nbreaks)
+        z <- z - mean(z)
+    } else {
+        breaks <- seq(min(z), max(z), length = nbreaks)
+    }
+    ncol <- length(breaks) - 1
+    col <- gplots::colorpanel(ncol, col1, col2, col3)
+    CUT <- cut(z, breaks = breaks)
+    # assign colors to heights for each point
+    colorlevels <- col[match(CUT, levels(CUT))]
+    names(colorlevels) <- names(z)
+    if (isMatrix) {
+        colormatrix <- matrix(colorlevels, ncol = ncol(oriz), nrow = nrow(oriz))
+        dimnames(colormatrix) <- dimnames(oriz)
+        return(colormatrix)
+    }
+    return(colorlevels)
 }
 
 
@@ -530,16 +530,20 @@ val2col <- function(z, col1 = "navy", col2 = "white",
 #' barplot2(values,errors,main="Bar plot with error bars")
 #' @export
 barplot2<-function(values,errors,...){
-  sums<-values+errors
-  bp<-barplot(values,beside=TRUE,ylim=c(0,1.1*max(sums)),...)
-  for(i in 1:nrow(bp)){
-    for(j in 1:ncol(bp)){
-      pos<-bp[i,j]
-      m<-values[i,j]
-      s<-errors[i,j]
-      arrows(pos,m+s,pos,m,angle=90,code=3,lwd=2,length=0.06)
+    if(!is.matrix(values)&!is.matrix(errors)){
+        values<-t(as.matrix(values))
+        errors<-t(as.matrix(errors))
     }
-  }
+    sums<-values+errors
+    bp<-barplot(values,beside=TRUE,ylim=c(0,1.1*max(sums)),...)
+    for(i in 1:nrow(bp)){
+        for(j in 1:ncol(bp)){
+            pos<-bp[i,j]
+            m<-values[i,j]
+            s<-errors[i,j]
+            arrows(pos,m+s,pos,m,angle=90,code=1,lwd=2,length=0.06)
+        }
+    }
 }
 
 # Function boxOverlap (needed for textrepel)
