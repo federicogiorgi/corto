@@ -116,7 +116,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     message("Initial testing of triplets for DPI")
   }
   # Remove edges which have no TF
-  filtered<-sigedges[sigedges[,1]%in%centroids,]
+  filtered<-sigedges[sigedges[,1]%in%centroids, , drop=FALSE]
   rm(sigedges)
   filtered[,1]<-as.character(filtered[,1])
   filtered[,2]<-as.character(filtered[,2])
@@ -194,8 +194,8 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     targets<-setdiff(features,centroids)
 
     # Calculate centroid x target correlations
-    cenmat<-tmat[,centroids]
-    tarmat<-tmat[,targets]
+    cenmat<-tmat[,centroids, drop=FALSE]
+    tarmat<-tmat[,targets, drop=FALSE]
     cormat<-cor(cenmat,tarmat)
 
     # Extract significant correlations

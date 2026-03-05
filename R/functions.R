@@ -88,8 +88,8 @@ fcor<-function(inmat,centroids,r){
     targets<-setdiff(features,centroids)
 
     # Calculate centroid x target correlations
-    cenmat<-tmat[,centroids]
-    tarmat<-tmat[,targets]
+    cenmat<-tmat[,centroids, drop = FALSE]
+    tarmat<-tmat[,targets, drop = FALSE]
     cormat<-cor(cenmat,tarmat)
 
     # Extract significant correlations
