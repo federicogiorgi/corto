@@ -243,7 +243,8 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
             mynes[myscores==0]<-0
             return(mynes)
         }))
-        return(nes)
+        outlist<-list(nes=nes,pvalue=z2p(nes),sig=sig,regulon=regulon)
+        return(outlist)
         # pnb<-nes["MYCN",names(hashtags)[hashtags=="pnb"]]
         # ctr<-nes["MYCN",names(hashtags)[hashtags=="ctr"]]
         # plot(density(pnb),col="red",lwd=3,main="MYCN Activity")
