@@ -134,13 +134,14 @@ mraplot(predicted)
 
 
 # References
-[1] Reverter, Antonio, and Eva KF Chan. "Combining partial correlation and an information theory approach to the reversed engineering of gene co-expression networks." Bioinformatics 24.21 (2008): 2491-2497.
+[1] Mercatelli, Daniele, et al. "corto: a lightweight R package for gene network inference and master regulator analysis." Bioinformatics, Vol 36, Issue 12, June 2020. DOI: https://doi.org/10.1093/bioinformatics/btaa223
 
 [2] D’Haeseleer, Patrik, Shoudan Liang, and Roland Somogyi. "Genetic network inference: from co-expression clustering to reverse engineering." Bioinformatics 16.8 (2000): 707-726.
 
 [3] Hansen, Bjoern O., et al. "Elucidating gene function and function evolution through comparison of co-expression networks of plants." Frontiers in plant science 5 (2014): 394.
 
 [4] Basso, Katia, et al. "Reverse engineering of regulatory networks in human B cells." Nature genetics 37.4 (2005): 382.
+
 [5] Amar, David, Hershel Safer, and Ron Shamir. "Dissection of regulatory networks that are altered in disease via differential co-expression." PLoS computational biology 9.3 (2013): e1002955.
 
 [6] Vandepoele, Klaas, et al. "Unraveling transcriptional control in Arabidopsis using cis-regulatory elements and coexpression networks." Plant physiology 150.2 (2009): 535-546.
@@ -163,4 +164,4 @@ mraplot(predicted)
 
 [15] Schubert, Michael, et al. "Gene networks in cancer are biased by aneuploidies and sample impurities." Biochimica et Biophisica Acta - Gene Regulatory Models (2019): 194444. DOI: https://doi.org/10.1016/j.bbagrm.2019.194444
 
-[16] Mercatelli, Daniele, et al. "corto: a lightweight R package for gene network inference and master regulator analysis." Bioinformatics, Vol 36, Issue 12, June 2020. DOI: https://doi.org/10.1093/bioinformatics/btaa223
+[16] Reverter, Antonio, and Eva KF Chan. "Combining partial correlation and an information theory approach to the reversed engineering of gene co-expression networks." Bioinformatics 24.21 (2008): 2491-2497.
