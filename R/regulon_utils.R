@@ -17,22 +17,22 @@ filter_regulon <- function(regulon,
   for (tf in tf_list) {
     if (is.null(regulon[[tf]])) next
     
-    targets <- names(regulon[[tf]]$tfmod)
-    correlations <- regulon[[tf]]$tfmod
+    targets <- names(regulon[[tf]]$tfmode)
+    correlations <- regulon[[tf]]$tfmode
     likelihoods <- regulon[[tf]]$likelihood
-    
+
     keep <- (likelihoods >= likelihood_threshold) & (abs(correlations) >= correlation_threshold)
-    
+
     if (sum(keep) == 0) next
-    
+
     regulon_filtered[[tf]] <- list(
-      tfmod = correlations[keep],
+      tfmode = correlations[keep],
       likelihood = likelihoods[keep]
     )
   }
-  
+
   if (length(regulon_filtered) == 0) {
-    message("⚠️ Regulon is empty after applying filters.")
+    message("Regulon is empty after applying filters.")
     return(NULL)
   }
   
@@ -47,7 +47,7 @@ filter_regulon <- function(regulon,
 #' @param export Logical. If TRUE, saves the result as a TSV file
 #' @param filename Name of the output file if export = TRUE
 #'
-#' @return A tibble with columns: TF, target, correlation, and likelihood
+#' @return A tibble with columns: tf, target, correlation, and likelihood
 #' @export
 getregulon <- function(regulon, 
                        tf_list = names(regulon), 
@@ -59,18 +59,18 @@ getregulon <- function(regulon,
     if (is.null(regulon[[name]])) {
       return(NULL)
     } else {
-      tf <- rep(name, length(regulon[[name]]$tfmod))
+      tf <- rep(name, length(regulon[[name]]$tfmode))
       likelihoods <- regulon[[name]]$likelihood
-      targets <- names(regulon[[name]]$tfmod)
-      correlations <- regulon[[name]]$tfmod
-      
+      targets <- names(regulon[[name]]$tfmode)
+      correlations <- regulon[[name]]$tfmode
+
       keep <- likelihoods >= likelihood_threshold
       if (sum(keep) == 0) return(NULL)
-      
+
       tsv_temp <- tibble::tibble(
         tf = tf[keep],
         target = targets[keep],
-        correlatio = correlations[keep],
+        correlation = correlations[keep],
         likelihood = likelihoods[keep]
       )
       tsv_temp <- dplyr::arrange(tsv_temp, tf, dplyr::desc(likelihood))

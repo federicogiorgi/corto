@@ -22,7 +22,7 @@ Description: We present 'corto' (Correlation Tool), a simple package to infer
 License: LGPL-3
 Encoding: UTF-8
 LazyData: FALSE
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Depends: R (>= 3.6)
 NeedsCompilation: no
 Imports:
@@ -33,6 +33,8 @@ Imports:
  parallel,
  pbapply,
  plotrix,
+ readr,
  stats,
+ tibble,
  utils
 VignetteBuilder: knitr

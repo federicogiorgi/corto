@@ -24,7 +24,7 @@ getregulon(
 \item{filename}{Name of the output file if export = TRUE}
 }
 \value{
-A tibble with columns: TF, target, correlation, and likelihood
+A tibble with columns: tf, target, correlation, and likelihood
 }
 \description{
 Convert a regulon object into a tibble

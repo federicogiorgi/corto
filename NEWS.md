@@ -1,4 +1,4 @@
-# corto 1.1.0 (Development version)
+# corto 1.2.2 (Development version)
 
 ## New features
 
