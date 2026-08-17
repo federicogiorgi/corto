@@ -28,6 +28,7 @@ gsea <- function(reflist,
                  w=1,
                  gsea_null=NULL) {
 
+    method<-match.arg(method)
 
     # Get elements in set that are in the ref list
     set <- intersect(names(reflist), set)
@@ -117,7 +118,7 @@ gsea <- function(reflist,
 
     # If we are in the tail, the p-value can be calculated in two ways
     if(is.na(p.value) || p.value<0.05) {
-        if(p.value==0){
+        if(is.na(p.value) || p.value==0){
             p.value <- 1/np
         }
         if (method=="pareto"){
@@ -157,12 +158,11 @@ gsea <- function(reflist,
 
 # Calculate Null Distribution for GSEA
 null_gsea<-function(set,reflist,w=1,np=1000){
-    gsea_null <- rep(0, np)
-    gsea_null <- sapply(1:np, function(i) {
-        # Identify indexes of set within the sorted reference list
-        inSet <- rep(0, length(reflist))
-        inSet[which(names(reflist) %in% set)] <- 1
+    # Identify indexes of set within the sorted reference list
+    inSet <- rep(0, length(reflist))
+    inSet[which(names(reflist) %in% set)] <- 1
 
+    gsea_null <- sapply(1:np, function(i) {
         # By sampling the order of the set elements, we get the real permutation
         null_inSet <- inSet[sample(1:length(inSet))]
 
@@ -263,6 +263,11 @@ plot_gsea <- function(gsea.obj, twoColors = c("red",
     }
     N <- length(reflist)
     ind <- 1:N
+    if (es >= 0) {
+        legend_position <- "topright"
+    } else {
+        legend_position <- "bottomleft"
+    }
 
 
     ### Define layout, let's end this
@@ -333,12 +338,6 @@ plot_gsea <- function(gsea.obj, twoColors = c("red",
         lines(c(l.ledge.ref.plot, l.ledge.ref.plot),
               c(min.plot, max.plot), lwd = 1,
               lty = 1, cex = 1)
-
-        if (es >= 0) {
-            legend_position <- "topright"
-        } else {
-            legend_position <- "bottomleft"
-        }
 
         # If external NES/ES/pvalue are not provided, the
         # standard GSEA one is shown
@@ -596,9 +595,10 @@ slice <- function(matrix) {
 #' @export
 gsea2 <- function (reflist, set1,set2, method = c("permutation", "pareto"),
                    np = 1000, w = 1, gsea_null = NULL) {
+    method<-match.arg(method)
     g1 <- gsea(reflist,set1,method=method,np = np, w = w, gsea_null = gsea_null)
     g2 <- gsea(reflist,set2,method=method,np = np, w = w, gsea_null = gsea_null)
-    ix <- order(reflist, decreasing = T)
+    ix <- order(reflist, decreasing = TRUE)
     reflist <- reflist[ix]
 
     gsea.obj <- list(
@@ -624,7 +624,12 @@ gsea2 <- function (reflist, set1,set2, method = c("permutation", "pareto"),
 #' @param title String to be plotted above the Running Enrichment Score
 #' @param bottomTitle String for the title of the bottom part of the plot
 #' @param bottomYlabel String for the Y label of the bottom plot
-#' (FALSE by default)
+#' @param legside1 String specifying the position of the first NES legend,
+#' for example "topright", "bottomleft". Default is NULL, letting the function
+#' automatically place it
+#' @param legside2 String specifying the position of the second NES legend,
+#' for example "topright", "bottomleft". Default is NULL, letting the function
+#' automatically place it
 #' @return Nothing, a plot is generated in the default output device
 #' @examples
 #' reflist<-setNames(-sort(rnorm(1000)),paste0('gene',1:1000))
@@ -637,7 +642,8 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
                         plotNames = FALSE,
                         title = "Running Enrichment Score",
                         bottomTitle = "List Values",
-                        bottomYlabel = "Signature values") {
+                        bottomYlabel = "Signature values",
+                        legside1=NULL,legside2=NULL) {
     # Keep original par device settings and layout
     on.exit(layout(1))
     opar<-par(no.readonly=TRUE)
@@ -709,13 +715,19 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
                                                      max(running_score1)), lwd = 1, lty = 1, cex = 1)
     lines(c(l.ledge.ref.plot2, l.ledge.ref.plot2), c(min(running_score2),
                                                      max(running_score2)), lwd = 1, lty = 1, cex = 1)
-    if(es1 >=0){legside1="topright"
-    }else{legside1="topleft"}
+
+    if(is.null(legside1)){
+        if(es1 >=0){legside1="topright"
+        }else{legside1="topleft"}
+    }
     legend(legside1, legend = c(paste("NES1 = ", signif(nes1, 3), sep = ""),
                                 paste("P1 = ", sprintf("%.2e",p.value1), sep = "")),
            bg = "white",box.col=twoColors[1],cex=1.5)
-    if(es2 >=0){legside2="bottomright"
-    }else{legside2="bottomleft"}
+
+    if(is.null(legside2)){
+        if(es2 >=0){legside2="bottomright"
+        }else{legside2="bottomleft"}
+    }
     legend(legside2, legend = c(paste("NES2 = ", signif(nes2, 3), sep = ""),
                                 paste("P2 = ", sprintf("%.2e",p.value2), sep = "")),
            bg = "white",box.col=twoColors[2],cex=1.5)
@@ -788,7 +800,8 @@ plot_gsea2 <- function (gsea.obj, twoColors = c("red", "blue"),
 #' @export
 ssgsea<-function(inmat,groups,scale=TRUE,minsize=10){
     if(scale){
-        inmat<-t(apply(inmat,1,scale))
+        # scale() and not apply(), which would drop the sample names
+        inmat<-t(base::scale(t(inmat)))
     }
     nesmat<-arena(inmat,groups,minsize=minsize)
     return(nesmat)

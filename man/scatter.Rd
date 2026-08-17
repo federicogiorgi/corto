@@ -36,7 +36,7 @@ TRUE}
 \item{grid}{a boolean indicating whether to show a plot grid. Default is TRUE}
 
 \item{bgcol}{Boolean. Should a background coloring associated to significance and sign of
-correlation be used? Default is TRUE, and it will color the background in red if the correlation
+correlation be used? Default is FALSE, and it will color the background in red if the correlation
 coefficient is positive, in blue if negative, in white if not significant (accordin to the
 _threshold_ parameter)}
 

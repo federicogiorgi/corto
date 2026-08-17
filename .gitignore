@@ -6,6 +6,8 @@ corto.Rproj
 inst/doc
 R/deleteme.R
 tmp/
+CLAUDE.md
+.claude/
 
 
 
