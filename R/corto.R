@@ -64,7 +64,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     }
     commoncols<-intersect(colnames(cnvmat),colnames(inmat))
     if(length(commoncols)==0){
-      stop("One or less columns in common between cnvmat and inmat")
+      stop("No columns in common between cnvmat and inmat")
     }
     cnvmat<-cnvmat[commonrows,commoncols]
     inmat<-inmat[commonrows,commoncols]
@@ -97,7 +97,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
   # Filtering zero variance
   allvars<-apply(inmat,1,var)
   keep<-names(allvars)[allvars>0]
-  inmat<-inmat[keep,]
+  inmat<-inmat[keep,,drop=FALSE]
   if(verbose){
     message("Removed ",nrow-length(keep)," features with zero variance")
   }
@@ -116,7 +116,7 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     message("Initial testing of triplets for DPI")
   }
   # Remove edges which have no TF
-  filtered<-sigedges[sigedges[,1]%in%centroids,]
+  filtered<-sigedges[sigedges[,1]%in%centroids,,drop=FALSE]
   rm(sigedges)
   filtered[,1]<-as.character(filtered[,1])
   filtered[,2]<-as.character(filtered[,2])
@@ -194,8 +194,8 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     targets<-setdiff(features,centroids)
 
     # Calculate centroid x target correlations
-    cenmat<-tmat[,centroids]
-    tarmat<-tmat[,targets]
+    cenmat<-tmat[,centroids,drop=FALSE]
+    tarmat<-tmat[,targets,drop=FALSE]
     cormat<-cor(cenmat,tarmat)
 
     # Extract significant correlations

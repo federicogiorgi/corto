@@ -23,7 +23,7 @@ val2col(
 
 \item{col3}{a color name for the max value, default 'red3'}
 
-\item{nbreaks}{Number of colors to be generated. Default is 30.}
+\item{nbreaks}{Number of colors to be generated. Default is 1000.}
 
 \item{center}{boolean, should the data be centered? Default is TRUE}
 

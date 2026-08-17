@@ -31,7 +31,8 @@ If provided, it will be considered as the "control" or "reference" sample set fo
 \item{minsize}{A minimum network size for each centroid/TF to be analyzed. Default is 10.}
 
 \item{nperm}{The number of times the input data will be permuted to generate null signatures.
-Default is 1000 if expmat2 is provided, and 10 if expmat2 is not provided (single sample mra).}
+Default is 1000 if expmat2 or a signature vector is provided, and 10 if only expmat1 is
+provided (single sample mra).}
 
 \item{nthreads}{The number of threads to use for generating null signatures. Default is 1}
 
@@ -46,7 +47,7 @@ A list summarizing the master regulator analysis
 \itemize{
 \item nes: the normalized enrichment score: positive if the centroid/TF network is upregulated
 in expmat1 vs expmat2 (or in expmat1 vs the mean of the dataset), negative if downregulated. A
-vector in multisample mode, a matrix in sample-by-sample mode.
+vector in multisample and signature mode, a matrix in sample-by-sample mode.
 \item pvalue: the pvalue of the enrichment.
 \item sig: the calculated signature (useful for plotting).
 \item regulon: the original regulon used in the analysis (but filtered for _minsize_)

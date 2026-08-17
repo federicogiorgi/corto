@@ -4,12 +4,16 @@
 \alias{barplot2}
 \title{barplot2 - Bar plot with upper error bars}
 \usage{
-barplot2(values, errors, ...)
+barplot2(values, errors, lower = FALSE, flat = TRUE, ...)
 }
 \arguments{
 \item{values}{A matrix of values}
 
 \item{errors}{A matrix of values for upper error bar}
+
+\item{lower}{Boolean, whether the lower error bar should be plotted, default FALSE}
+
+\item{flat}{Boolean, whether the head of bars should be flat, default TRUE}
 
 \item{...}{Arguments to be passed to the core _barplot_ function}
 }

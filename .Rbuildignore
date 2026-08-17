@@ -4,3 +4,5 @@
 ^R/deleteme\.R$
 ^/tmp$
 ^README\.md$
+^CLAUDE\.md$
+^\.claude$

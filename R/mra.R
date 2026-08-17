@@ -13,7 +13,8 @@
 #' @param regulon A _regulon_ object, output of the _corto_ function.
 #' @param minsize A minimum network size for each centroid/TF to be analyzed. Default is 10.
 #' @param nperm The number of times the input data will be permuted to generate null signatures.
-#' Default is 1000 if expmat2 is provided, and 10 if expmat2 is not provided (single sample mra).
+#' Default is 1000 if expmat2 or a signature vector is provided, and 10 if only expmat1 is
+#' provided (single sample mra).
 #' @param nthreads The number of threads to use for generating null signatures. Default is 1
 #' @param atacseq An optional 3 column matrix derived from an ATAC-Seq analysis, indicating
 #' 1) gene symbol, 2) -log10(FDR)*sing(log2FC) of an ATAC-Seq design, 3) distance from TSS.
@@ -23,7 +24,7 @@
 #' \itemize{
 #' \item nes: the normalized enrichment score: positive if the centroid/TF network is upregulated
 #' in expmat1 vs expmat2 (or in expmat1 vs the mean of the dataset), negative if downregulated. A
-#' vector in multisample mode, a matrix in sample-by-sample mode.
+#' vector in multisample and signature mode, a matrix in sample-by-sample mode.
 #' \item pvalue: the pvalue of the enrichment.
 #' \item sig: the calculated signature (useful for plotting).
 #' \item regulon: the original regulon used in the analysis (but filtered for _minsize_)
@@ -37,7 +38,7 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 
     # Setting default nperm if not set by the user
     if(is.null(nperm)){
-        if(is.null(expmat2)){
+        if(is.null(expmat2)&!is.vector(expmat1)){
             nperm<-10
         } else{
             nperm<-1000
@@ -63,7 +64,56 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 
     # Case 0: expmat1 is a signature
     if(is.vector(expmat1)){
-        stop("Input data is provided as vector, Calculating Signature Master Regulator Analysis")
+        if(verbose){
+            message("Input data is provided as vector, calculating Signature Master Regulator Analysis")
+        }
+        sig<-expmat1[!is.na(expmat1)]
+        common<-intersect(names(sig),colnames(netmat))
+        if(length(common)==0){
+            stop("No feature in common between the input signature and the regulon")
+        }
+        sig<-sig[common]
+        netmat<-netmat[,common,drop=FALSE]
+
+        # Then we slightly reduce the contribution of targets shared by multiple centroids
+        netmat<-t(t(netmat)/(colSums(netmat!=0)^0.5))
+
+        # Calculate unnormalized scores
+        scores<-(netmat%*%sig)[,1]
+
+        # Permuted signatures
+        nullsigperm0<-function(seed=0,sig,netmat){
+            set.seed(seed)
+            nullsig<-setNames(sample(sig),names(sig))
+            nullscores<-(netmat%*%nullsig)[,1]
+            return(nullscores)
+        }
+
+        # The pbapply snippet
+        cl<-parallel::makeCluster(nthreads)
+        nullscores<-pblapply(cl=cl,
+                             X=1:nperm,
+                             FUN=nullsigperm0,
+                             sig=sig,netmat=netmat
+        )
+        parallel::stopCluster(cl)
+        nullscores<-do.call(cbind,nullscores)
+
+        # Compare scores with nullscores
+        # Fit gaussians
+        nes<-apply(cbind(scores,nullscores),1,function(x){
+            myscore<-x[1]
+            morescores<-x[2:length(x)]
+            mu<-mean(morescores)
+            sigma<-sd(morescores)
+            p<-pnorm(abs(myscore),mean=mu,sd=sigma,lower.tail=FALSE)*2
+            if(p==0){p<-.Machine$double.xmin}
+            mynes<-p2z(p)*sign(myscore)
+            if(myscore==0){mynes<-0}
+            return(mynes)
+        })
+        outlist<-list(nes=nes,pvalue=z2p(nes),sig=sig,regulon=regulon)
+        return(outlist)
     }
 
 
@@ -71,10 +121,10 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
     if(!is.null(expmat2)){
         # Check for zero-variance genes
         vargenes<-apply(expmat1,1,var)
-        expmat11<-expmat1[which(vargenes>0),]
+        expmat11<-expmat1[which(vargenes>0),,drop=FALSE]
         rm(vargenes)
         vargenes<-apply(expmat2,1,var)
-        expmat22<-expmat2[which(vargenes>0),]
+        expmat22<-expmat2[which(vargenes>0),,drop=FALSE]
         rm(vargenes)
         if(nrow(expmat11)<nrow(expmat1)){
             message("Removed ",nrow(expmat1)-nrow(expmat11)," rows with zero variance")
@@ -83,8 +133,8 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
             message("Removed ",nrow(expmat2)-nrow(expmat22)," rows with zero variance")
         }
         common<-intersect(rownames(expmat11),rownames(expmat22))
-        expmat1<-expmat11[common,]
-        expmat2<-expmat22[common,]
+        expmat1<-expmat11[common,,drop=FALSE]
+        expmat2<-expmat22[common,,drop=FALSE]
         rm(expmat11,expmat22)
 
         # We create a signature
@@ -97,7 +147,7 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
         sig<-sig[!is.na(sig)]
         common<-intersect(names(sig),colnames(netmat))
         sig<-sig[common]
-        netmat<-netmat[,common]
+        netmat<-netmat[,common,drop=FALSE]
 
         # Then we slightly reduce the contribution of targets shared by multiple centroids
         # But only targets in the signature
@@ -149,12 +199,13 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
         cl<-parallel::makeCluster(nthreads)
         #invisible(parallel::clusterExport(cl=cl,varlist=c("nthreads")))
         #invisible(parallel::clusterEvalQ(cl= cl,library(dplyr)))
-        nullscores<-pbsapply(cl=cl,
+        nullscores<-pblapply(cl=cl,
                              X=1:nperm,
                              FUN=nullsigperm1,
                              expmat1=expmat1,expmat2=expmat2,netmat=netmat
         )
         parallel::stopCluster(cl)
+        nullscores<-do.call(cbind,nullscores)
 
 
         # Compare scores with nullscores
@@ -193,8 +244,8 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
         # sigs<-t(scale(t(expmat1))) # Exactly the same
         sigmat[is.na(sigmat)]<-0
         common<-intersect(rownames(sigmat),colnames(netmat))
-        sigmat<-sigmat[common,]
-        netmat<-netmat[,common]
+        sigmat<-sigmat[common,,drop=FALSE]
+        netmat<-netmat[,common,drop=FALSE]
 
         # Then we slightly reduce the contribution of targets shared by multiple centroids
         # But only targets in the signature
@@ -213,7 +264,8 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
                 y<-(x-mean(x))/sd(x)
                 return(y)
             }))
-            nullsigmat<-nullsigmat[colnames(netmat),]
+            nullsigmat[is.na(nullsigmat)]<-0
+            nullsigmat<-nullsigmat[colnames(netmat),,drop=FALSE]
             nullscores<-(netmat%*%nullsigmat)
             return(nullscores)
         }
@@ -243,7 +295,8 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
             mynes[myscores==0]<-0
             return(mynes)
         }))
-        return(nes)
+        outlist<-list(nes=nes,pvalue=z2p(nes),sig=sigmat,regulon=regulon)
+        return(outlist)
         # pnb<-nes["MYCN",names(hashtags)[hashtags=="pnb"]]
         # ctr<-nes["MYCN",names(hashtags)[hashtags=="ctr"]]
         # plot(density(pnb),col="red",lwd=3,main="MYCN Activity")
@@ -265,6 +318,9 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 #' @export
 mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis",pthr=0.01){
     # Checks ----
+    if(is.matrix(mraobj$nes)){
+        stop("Sample-by-sample mra results cannot be plotted by mraplot")
+    }
     if(is.numeric(mrs)){
         mrs<-names(sort(abs(mraobj$nes),decreasing=TRUE))[1:mrs]
     } else if(is.character(mrs)){
@@ -346,21 +402,23 @@ mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis",pthr=0.
         par(mar=c(0,0,0,0),xaxs="i")
         plot(0,xlim=c(-1.5,1.5),ylim=c(-1.2,1.2),type="n",ann=F,bty='n',xaxt='n',yaxt='n')
 
-        # Which targets to show
+        # Which targets to show (padded with blanks if the network has less than 12)
         targets<-names(mraobj$regulon[[mr]]$tfmode)
         targets<-intersect(targets,names(ranksig))
-        toshow<-names(sort(ranksigabs[targets],decreasing=TRUE)[1:12])
+        toshow<-names(sort(ranksigabs[targets],decreasing=TRUE))[1:min(12,length(targets))]
+        sighere<-mraobj$sig[toshow]
+        tfmodehere<-mraobj$regulon[[mr]]$tfmode[toshow]
+        toshow<-c(toshow,rep("",12-length(toshow)))
 
         # Colors
         col<-rep("white",12)
-        col[mraobj$sig[toshow]<0]<-"#6495ED66" # cornflowerblue
-        col[mraobj$sig[toshow]>0]<-"#FF8C6966" # salmon
+        col[which(sighere<0)]<-"#6495ED66" # cornflowerblue
+        col[which(sighere>0)]<-"#FF8C6966" # salmon
 
         # Type of regulation (mode of action)
         moa<-rep("unknown",12)
-        tfmodehere<-mraobj$regulon[[mr]]$tfmode[toshow]
-        moa[tfmodehere>0]<-"activation"
-        moa[tfmodehere<0]<-"repression"
+        moa[which(tfmodehere>0)]<-"activation"
+        moa[which(tfmodehere<0)]<-"repression"
         angle<-moa
         angle[moa=="activation"]<-30
         angle[moa=="repression"]<-90
