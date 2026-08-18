@@ -1,15 +1,13 @@
 Package: corto
 Type: Package
 Title: Inference of Gene Regulatory Networks
-Version: 1.3.0
+Version: 1.3.1
 Authors@R: c(
  person("Federico M.","Giorgi",email = "federico.giorgi@gmail.com",role=c("aut","cre")),
  person("Daniele","Mercatelli",email = "danielemercatelli@gmail.com",role="ctb"),
  person("Gonzalo","Lopez-Garcia",email = "gonzolgarcia@gmail.com",role="ctb"),
- person("Hugo Antonio","Tovar Romero",email = "hatovar@inmegen.gob.mx",role="ctb",
-  comment="Instituto Nacional de Medicina Genómica (INMEGEN), México"),
- person("Hualin","Wang",email = "wanghualin@stu.njmu.edu.cn",role="ctb",
-  comment="Nanjing Medical University, China"))
+ person("Hugo","Tovar",email = "hatovar@inmegen.gob.mx",role="ctb"),
+ person("Hualin","Wang",email = "wanghualin@stu.njmu.edu.cn",role="ctb"))
 Maintainer: Federico M. Giorgi <federico.giorgi@gmail.com>
 Description: We present 'corto' (Correlation Tool), a simple package to infer
  gene regulatory networks and visualize master regulators from gene expression
@@ -28,8 +26,7 @@ Encoding: UTF-8
 Depends: R (>= 3.6)
 NeedsCompilation: no
 Imports:
- dplyr,
- gplots,
+ grDevices,
  graphics,
  methods,
  parallel,

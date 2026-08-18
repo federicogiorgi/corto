@@ -3,6 +3,26 @@ maxabs<-function(x){
     max(abs(x))
 }
 
+# Replica of gplots::colorpanel, kept here to avoid the dependency
+colorpanel<-function(n,low,mid,high){
+    isodd<-n%%2==1
+    if(isodd){n<-n+1}
+    low<-col2rgb(low)
+    mid<-col2rgb(mid)
+    high<-col2rgb(high)
+    lower<-floor(n/2)
+    upper<-n-lower
+    red<-c(seq(low[1,1],mid[1,1],length=lower),seq(mid[1,1],high[1,1],length=upper))/255
+    green<-c(seq(low[3,1],mid[3,1],length=lower),seq(mid[3,1],high[3,1],length=upper))/255
+    blue<-c(seq(low[2,1],mid[2,1],length=lower),seq(mid[2,1],high[2,1],length=upper))/255
+    if(isodd){
+        red<-red[-(lower+1)]
+        green<-green[-(lower+1)]
+        blue<-blue[-(lower+1)]
+    }
+    rgb(red,blue,green)
+}
+
 # Function to extract correlation indeces
 extract<-function(mat,x,y){
     mat[x+nrow(mat)*(y-1)]
@@ -503,7 +523,7 @@ val2col <- function(z, col1 = "navy", col2 = "white",
         breaks <- seq(min(z), max(z), length = nbreaks)
     }
     ncolors <- length(breaks) - 1
-    col <- gplots::colorpanel(ncolors, col1, col2, col3)
+    col <- colorpanel(ncolors, col1, col2, col3)
     CUT <- cut(z, breaks = breaks)
     # assign colors to heights for each point
     colorlevels <- col[match(CUT, levels(CUT))]

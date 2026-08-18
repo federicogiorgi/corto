@@ -44,7 +44,7 @@ Then, load it:
 library(corto)
 ```
 
-Then, you can see how the input matrix looks like. For example, this dataset comes from the TCGA mesothelioma project [13] and measures the expression of 10021 genes across 87 samples:
+Then, you can see how the input matrix looks like. For example, this dataset comes from the TCGA mesothelioma project [13] and measures the expression of 7000 genes across 87 samples:
 ```{r load1}
 load(system.file("extdata","inmat.rda",package="corto"))
 inmat[1:5,1:5]
@@ -65,14 +65,14 @@ length(centroids)
 Finally, we can run _corto_. In this example, we will run it with p-value threshold of 1e-30, 10 bootstraps and 2 threads
 ```{r runcorto,message=FALSE,results="hide"}
 regulon<-corto(inmat,centroids=centroids,nbootstraps=10,p=1e-30,nthreads=2)
-# Input Matrix has 87 samples and 10021 features
+# Input Matrix has 87 samples and 7000 features
 # Correlation Coefficient Threshold is: 0.889962633618839
-# Removed 112 features with zero variance
+# Removed 64 features with zero variance
 # Calculating pairwise correlations
 # Initial testing of triplets for DPI
-# 246 edges passed the initial threshold
-# Building DPI network from 37 centroids and 136 targets
-# Running 100 bootstraps with 2 thread(s)
+# 115 edges passed the initial threshold
+# Building DPI network from 30 centroids and 76 targets
+# Running 10 bootstraps with 2 thread(s)
 # Calculating edge likelihood
 # Generating regulon object
 ```
@@ -82,7 +82,7 @@ The regulon object is a list:
 regulon[1:2]
 ```
 
-The regulon in this dataset is composed of 34 final centroids with at least one target:
+The regulon in this dataset is composed of 28 final centroids with at least one target:
 ```{r prinregulon2}
 length(regulon)
 ```

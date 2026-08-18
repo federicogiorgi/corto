@@ -1,12 +1,12 @@
-# corto 1.3.0
+# corto 1.3.1
 
 ## New features
 
 * `mra()` now performs Signature Master Regulator Analysis when `expmat1` is
   provided as a named vector, as the documentation had always described. The
   null model permutes the signature values across feature names, and `nperm`
-  defaults to 1000 in this mode. Thanks to Hugo Antonio Tovar Romero (INMEGEN,
-  Mexico) for the detailed diagnosis and a reference implementation (#13).
+  defaults to 1000 in this mode. Thanks to Hugo Tovar for the detailed
+  diagnosis and a reference implementation (#13).
 
 ## Breaking changes
 
@@ -19,8 +19,7 @@
 
 * `corto()` failed with `invalid 'row.names' length` when a single centroid was
   provided. The internal correlation step dropped to a vector and lost its row
-  names. Thanks to Hualin Wang (Nanjing Medical University, China) for the fix
-  (#6, #14).
+  names. Thanks to Hualin Wang for the fix (#6, #14).
 * Sample-by-sample `mra()` returned an all-NA matrix whenever any regulon target
   had zero variance in the input matrix. The permuted null signatures were not
   NA-guarded the way the real signature was.
@@ -36,10 +35,22 @@
   filtering.
 * `mraplot()` now stops with an informative message when given sample-by-sample
   results, which it cannot plot.
+* `corto()` now stops with an informative message when no edge passes the
+  correlation threshold, instead of failing on an invalid row name.
+
+## Performance
+
+* `corto()` is roughly 1.2x faster single-threaded and 1.4x faster on 4 threads.
+  The input matrix is transposed once instead of once per bootstrap and is no
+  longer shipped twice to the workers, DPI selection is done by a radix sort
+  rather than a grouped data frame, and the regulon is assembled in one pass
+  instead of rescanning the edge table for every centroid. Results are
+  bit-identical to previous versions.
 
 ## Other
 
-* `knitr` and `rmarkdown` moved from Imports to Suggests, `graphics` added to
-  Imports.
+* `dplyr` and `gplots` are no longer required, which removes about 20 recursive
+  dependencies and makes installation considerably faster. `knitr` and
+  `rmarkdown` moved from Imports to Suggests, `grDevices` and `graphics` added.
 * Documented defaults corrected for `scatter(bgcol=)`, `val2col(nbreaks=)` and
   `plot_gsea2()`.

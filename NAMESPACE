@@ -25,12 +25,11 @@ export(z2p)
 importFrom("stats","cor","cor.test","pt","qt","setNames","var","lm","t.test","sd",
     "pchisq","ks.test","pnorm","qnorm","quantile","predict","runif")
 importFrom("utils", "setTxtProgressBar", "txtProgressBar", "relist")
-importFrom("gplots", "colorpanel")
+importFrom("grDevices", "col2rgb", "rgb")
 import("parallel")
 import("pbapply")
 importFrom("methods", "is")
 importFrom("plotrix","draw.circle")
-importFrom("dplyr", "%>%", "filter", "group_by")
 importFrom("graphics","abline","arrows","barplot","box","grid","layout",
 "legend","lines","mtext","matlines","points", "strheight", "strwidth",
 "segments","par","plot","rect","text")

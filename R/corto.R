@@ -105,28 +105,65 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
   centroids<-intersect(rownames(inmat),centroids)
   targets<-setdiff(rownames(inmat),centroids)
 
+  ## Functions required by the bootstrap jobs ----
+  # Significant centroid-target correlations, on a samples x features matrix
+  corhits<-function(tmat,centroids,r){
+    targets<-setdiff(colnames(tmat),centroids)
+    cormat<-stats::cor(tmat[,centroids,drop=FALSE],tmat[,targets,drop=FALSE])
+    hits<-which(abs(cormat)>=r,arr.ind=TRUE)
+    list(
+      centroid=rownames(cormat)[hits[,1]],
+      tg=colnames(cormat)[hits[,2]],
+      cor=as.numeric(as.character(cormat[hits[,1]+nrow(cormat)*(hits[,2]-1)]))
+    )
+  }
+  # DPI: which edges hold the strongest correlation for their target
+  dpiwin<-function(tg,cor){
+    a<-abs(cor)
+    o<-order(tg,-a,method="radix")
+    g<-tg[o]
+    first<-!duplicated(g)
+    mx<-rep(a[o][first],diff(c(which(first),length(g)+1L)))
+    win<-logical(length(a))
+    win[o]<-a[o]==mx
+    win
+  }
+  # Function to calculate DPI on a bootstrapped matrix
+  funboot<-function(seed=0,tmat,centroids,r,selected_edges){
+    set.seed(seed)
+    boot<-corhits(tmat[sample(nrow(tmat),replace=TRUE),,drop=FALSE],centroids,r)
+    edges<-paste0(boot$centroid,"_",boot$tg)
+    inset<-edges%in%selected_edges
+    edges[inset][dpiwin(boot$tg[inset],boot$cor[inset])]
+  }
+  # Bootstraps run in their own environment, so the input matrix is shipped once
+  bootenv<-new.env(parent=baseenv())
+  environment(corhits)<-bootenv
+  environment(dpiwin)<-bootenv
+  environment(funboot)<-bootenv
+  bootenv$corhits<-corhits
+  bootenv$dpiwin<-dpiwin
+
   # Calculating pairwise correlations
   if(verbose){
     message("Calculating pairwise correlations")
   }
-  sigedges<-fcor(inmat,centroids,r)
+  tmat<-t(inmat)
+  rm(inmat)
+  edges<-corhits(tmat,centroids,r)
+  if(length(edges$centroid)==0){
+    stop("No edges passed the initial threshold, try a less stringent p")
+  }
 
   # Extract all triplets TF-TF-TG
   if(verbose){
     message("Initial testing of triplets for DPI")
   }
-  # Remove edges which have no TF
-  filtered<-sigedges[sigedges[,1]%in%centroids,,drop=FALSE]
-  rm(sigedges)
-  filtered[,1]<-as.character(filtered[,1])
-  filtered[,2]<-as.character(filtered[,2])
-  filtered[,3]<-as.numeric(as.character(filtered[,3]))
-  rownames(filtered)<-paste0(filtered[,1],"_",filtered[,2])
-  selected_edges<-rownames(filtered)
+  selected_edges<-paste0(edges$centroid,"_",edges$tg)
   if(verbose){
-    message(nrow(filtered)," edges passed the initial threshold")
+    message(length(selected_edges)," edges passed the initial threshold")
   }
-  selected_nodes<-unique(c(filtered[,1],filtered[,2]))
+  selected_nodes<-unique(c(edges$centroid,edges$tg))
   centroids<-intersect(centroids,selected_nodes)
   targets<-setdiff(selected_nodes,centroids)
   if(verbose){
@@ -135,124 +172,50 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
   }
 
   # DPI: Test all edges triplets for winners
-  # winners<-matrix(nrow=0,ncol=3)
-  # for(tg in targets){ # TO DO an apply
-  #   tf_candidates<-filtered[filtered[,2]==tg,]
-  #   tf_candidate<-tf_candidates[which.max(abs(tf_candidates[,3])),]
-  #   winners<-rbind(winners,tf_candidate)
-  # }
-  colnames(filtered)<-c("centroid","tg","cor")
-  tg<-filtered[,"tg"]
-  winners<-as.matrix(filtered %>% group_by(tg) %>% filter(abs(cor)==maxabs(cor)))
-  rownames(winners)<-paste0(winners[,1],"_",winners[,2])
-  occ<-cbind(filtered,rep(0,nrow(filtered)))
   # Appearing in the original matrix counts as one evidence
-  occ[rownames(winners),4]<-1
-  rm(winners,filtered)
-  colnames(occ)[4]<-"occurrences"
+  occurrences<-as.numeric(dpiwin(edges$tg,edges$cor))
 
   # Now run bootstraps to check the number of wins
   if(verbose){
     message("Running ",nbootstraps," bootstraps with ",nthreads," thread(s)")
   }
 
-
-  ## Run the bootstraps in multithreading
-  # Functions required by the bootstrap jobs ----
-  # Function to calculate DPI
-  funboot<-function(seed=0,inmat,centroids,r,selected_edges,targets){
-    bootsigedges<-bootmat(inmat,centroids,r,seed=seed)
-    # Get surviving edges
-    filtered<-bootsigedges[bootsigedges[,1]%in%centroids,]
-    rm(bootsigedges)
-    filtered[,1]<-as.character(filtered[,1])
-    filtered[,2]<-as.character(filtered[,2])
-    filtered[,3]<-as.numeric(as.character(filtered[,3]))
-    rownames(filtered)<-paste0(filtered[,1],"_",filtered[,2])
-    filtered<-filtered[intersect(rownames(filtered),selected_edges),]
-    # Test all edges triplets for winners
-    colnames(filtered)<-c("centroid","tg","cor")
-    tg<-filtered[,"tg"]
-    winners<-as.matrix(filtered %>% group_by(tg) %>% filter(abs(cor)==maxabs(cor)))
-    rownames(winners)<-paste0(winners[,1],"_",winners[,2])
-    # Return surviving edges in bootstrap
-    return(rownames(winners))
-  }
-  # Function to bootstrap Matrix
-  bootmat<-function(inmat,centroids,r,seed=NULL){
-    set.seed(seed)
-    bootmat<-inmat[,sample(colnames(inmat),replace=TRUE)]
-    # Calculate correlations in the bootstrapped matrix
-    bootsigedges<-fcor(bootmat,centroids,r)
-    return(bootsigedges)
-  }
-  # Function to calculate correlation in bootstraps
-  fcor<-function(inmat,centroids,r){
-    tmat<-t(inmat)
-    nfeatures<-ncol(tmat)
-    features<-colnames(tmat)
-    targets<-setdiff(features,centroids)
-
-    # Calculate centroid x target correlations
-    cenmat<-tmat[,centroids,drop=FALSE]
-    tarmat<-tmat[,targets,drop=FALSE]
-    cormat<-cor(cenmat,tarmat)
-
-    # Extract significant correlations
-    hits<-which(abs(cormat)>=r,arr.ind=TRUE)
-    rowhits<-rownames(cormat)[hits[,1]]
-    colhits<-colnames(cormat)[hits[,2]]
-
-    # Extract correlation indeces
-    corhits<-cormat[hits[,1]+nrow(cormat)*(hits[,2]-1)]
-
-    # Results
-    sigedges<-as.data.frame(cbind(rowhits,colhits,corhits))
-
-    return(sigedges)
-  }
-  # Max of absolute value
-  maxabs<-function(x){
-    max(abs(x))
-  }
-
-
-
   # The pbapply snippet ----
   cl<-parallel::makeCluster(nthreads)
-  #invisible(parallel::clusterExport(cl=cl,varlist=c("nthreads")))
-  invisible(parallel::clusterEvalQ(cl= cl,library(dplyr)))
   winnerlist<-unlist(pblapply(cl=cl,
                               X=1:nbootstraps,
                               FUN=funboot,
-                              inmat=inmat,centroids=centroids,r=r,selected_edges=selected_edges,targets=targets
+                              tmat=tmat,centroids=centroids,r=r,selected_edges=selected_edges
   ))
   parallel::stopCluster(cl)
 
   # Add occurrences
   add<-table(winnerlist)
-  occ[names(add),"occurrences"]<-occ[names(add),"occurrences"]+add
+  hitrows<-match(names(add),selected_edges)
+  occurrences[hitrows]<-occurrences[hitrows]+as.numeric(add)
 
   # Likelihood based on bootstrap occurrence
   if(verbose){
     message("Calculating edge likelihood")
   }
-  occ$likelihood<-occ$occurrences/(nbootstraps+1)
-  occ<-occ[occ$likelihood>boot_threshold,]
+  likelihood<-occurrences/(nbootstraps+1)
+  keep<-likelihood>boot_threshold
 
   # Generate regulon object
   if(verbose){
     message("Generating regulon object")
   }
+  cens<-edges$centroid[keep]
+  tgs<-edges$tg[keep]
+  cors<-edges$cor[keep]
+  liks<-likelihood[keep]
+  rows<-split(seq_along(cens),cens)
   regulon<-list()
-  for(tf in unique(occ[,1])){
-    targets<-occ[occ[,1]==tf,2]
-    corr<-occ[occ[,1]==tf,3]
-    likelihood<-occ[occ[,1]==tf,5]
-    tfmode<-setNames(corr,targets)
+  for(tf in unique(cens)){
+    i<-rows[[tf]]
     regulon[[tf]]<-list(
-      tfmode=tfmode,
-      likelihood=likelihood
+      tfmode=setNames(cors[i],tgs[i]),
+      likelihood=liks[i]
     )
   }
 
