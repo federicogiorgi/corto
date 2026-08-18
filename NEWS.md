@@ -2,6 +2,11 @@
 
 ## New features
 
+* New `filter_regulon()` and `getregulon()` helpers for post-processing a
+  regulon: subset it by centroid, likelihood and absolute correlation, and
+  flatten it into a data frame of edges with optional tab-separated export.
+  Proposed by Hugo Tovar (#15).
+
 * `mra()` now performs Signature Master Regulator Analysis when `expmat1` is
   provided as a named vector, as the documentation had always described. The
   null model permutes the signature values across feature names, and `nperm`

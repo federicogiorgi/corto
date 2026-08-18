@@ -2,7 +2,9 @@
 
 export(barplot2)
 export(corto)
+export(filter_regulon)
 export(fisherp)
+export(getregulon)
 export(gsea)
 export(gsea2)
 export(kmgformat)
@@ -24,7 +26,7 @@ export(wstouffer)
 export(z2p)
 importFrom("stats","cor","cor.test","pt","qt","setNames","var","lm","t.test","sd",
     "pchisq","ks.test","pnorm","qnorm","quantile","predict","runif")
-importFrom("utils", "setTxtProgressBar", "txtProgressBar", "relist")
+importFrom("utils", "setTxtProgressBar", "txtProgressBar", "relist", "write.table")
 importFrom("grDevices", "col2rgb", "rgb")
 import("parallel")
 import("pbapply")
