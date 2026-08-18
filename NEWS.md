@@ -40,6 +40,9 @@
   filtering.
 * `mraplot()` now stops with an informative message when given sample-by-sample
   results, which it cannot plot.
+* The CNV correction step dropped to a vector when `cnvmat` and `inmat` had a
+  single sample or a single target in common, the same dimension-drop problem
+  fixed elsewhere. Guarded with `drop=FALSE`.
 * `corto()` now stops with an informative message when no edge passes the
   correlation threshold, instead of failing on an invalid row name.
 

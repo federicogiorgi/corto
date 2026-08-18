@@ -66,12 +66,12 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     if(length(commoncols)==0){
       stop("No columns in common between cnvmat and inmat")
     }
-    cnvmat<-cnvmat[commonrows,commoncols]
-    inmat<-inmat[commonrows,commoncols]
+    cnvmat<-cnvmat[commonrows,commoncols,drop=FALSE]
+    inmat<-inmat[commonrows,commoncols,drop=FALSE]
 
     # Correct inmat based on cnvmat (only for targets)
-    targetmat<-inmat[setdiff(rownames(cnvmat),centroids),]
-    cnvtargetmat<-cnvmat[setdiff(rownames(cnvmat),centroids),]
+    targetmat<-inmat[setdiff(rownames(cnvmat),centroids),,drop=FALSE]
+    cnvtargetmat<-cnvmat[setdiff(rownames(cnvmat),centroids),,drop=FALSE]
     if(verbose){
       message("Applying residual calculation for ",ncol(targetmat)," samples and ",nrow(targetmat)," target features")
     }
