@@ -16,7 +16,7 @@ install_github("federicogiorgi/corto")
 
 
 # Introduction
-The _corto_ ("correlation tool") package provides a pipeline to infer networks between "centroid" and "target" variables in a dataset, using a combination of Pearson correlation and Data Processing Inequality (DPI), first proposed in [1]. The main application of _corto_ is in the field of Bioinformatics and Transcriptomics, where co-occurrence between variables can be used as a mean to infer regulatory mechanisms [2] or gene functions [3]. In this field, usually the tested features are genes (or rather, their expression profile across samples), whereas the centroids are Transcription Factors (TFs) and their targets are Target Genes (TGs). The TF-TG co-expression can hint at a causal regulatory relationship, as proven in many studies [4,5,6]. The _corto_ tool replicates the well-established pipeline of the ARACNe family of tools [7,8,9]
+The _corto_ ("correlation tool") package provides a pipeline to infer networks between "centroid" and "target" variables in a dataset, using a combination of Pearson correlation and Data Processing Inequality (DPI), first proposed in [1]. The main application of _corto_ is in the field of Bioinformatics and Transcriptomics, where co-occurrence between variables can be used as a mean to infer regulatory mechanisms [2] or gene functions [3]. In this field, usually the tested features are genes (or rather, their expression profile across samples), whereas the centroids are Transcription Factors (TFs) and their targets are Target Genes (TGs). The TF-TG co-expression can hint at a causal regulatory relationship, as proven in many studies [4,5,6]. The _corto_ tool replicates the well-established pipeline of the ARACNe family of tools [8,9,10]
 
 _corto_ focuses on tho aspects:
 
@@ -27,9 +27,9 @@ _corto_ focuses on tho aspects:
 ## The _corto_ Gene Network Inference Algorithm
 In brief, _corto_ operates using the following steps:
 
-1. Load a gene expression matrix and a list of user-provided centroids (e.g. TFs). Data should be normalized via Variance Stabilizing Transformation (VST) for RNA-Seq, and Robust Multiarray Average (RMA) for microarrays, as described in [10].
+1. Load a gene expression matrix and a list of user-provided centroids (e.g. TFs). Data should be normalized via Variance Stabilizing Transformation (VST) for RNA-Seq, and Robust Multiarray Average (RMA) for microarrays, as described in [1].
 2. Removal of genes with zero variance across the dataset and rank-transformation of each gene expression profile.
-3. Calculate all pairwise Pearson correlation coefficients between centroid and target features. The rank transformation operated by the Pearson correlation coefficient is a common procedure used in co-expression based studies, due to its benefits in reducing the effects of outliers [11].
+3. Calculate all pairwise Pearson correlation coefficients between centroid and target features. The rank transformation operated by the Pearson correlation coefficient is a common procedure used in co-expression based studies, due to its benefits in reducing the effects of outliers [1].
 4. Filter out all centroid-target features whose correlation coefficient _absolute value_ is below the provided p-value threshold _p_.
 5. Apply DPI to all centroid-centroid-target triplets, in order to identify which centroid-target correlation is stronger and identify the most likely association (e.g. which TF is the most likely regulator of the TG in the dataset).
 6. All edges are tested for Data Processing Inequality in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [8]). This step can be run in parallel by specifiying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
@@ -154,7 +154,7 @@ mraplot(predicted)
 
 [10] Giorgi, Federico M., et al. "Comparative study of RNA-seq-and microarray-derived coexpression networks in Arabidopsis thaliana." Bioinformatics 29.6 (2013): 717-724.
 
-[11] Usadel, Björn, et al. "Co‐expression tools for plant biology: opportunities for hypothesis generation and caveats." Plant, cell & environment 32.12 (2009): 1633-1651.
+[1] Usadel, Björn, et al. "Co‐expression tools for plant biology: opportunities for hypothesis generation and caveats." Plant, cell & environment 32.12 (2009): 1633-1651.
 
 [12] Alvarez, Mariano J., Federico Giorgi, and Andrea Califano. "Using viper, a package for Virtual Inference of Protein-activity by Enriched Regulon analysis." Bioconductor (2014): 1-14.
 
