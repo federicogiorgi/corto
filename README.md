@@ -131,7 +131,8 @@ mraplot(predicted)
 ```
 ![Figure1](https://user-images.githubusercontent.com/1401900/159940897-4d7372d0-0a32-44b4-9269-d2fa4aa6d9af.png)
 
-
+# Funding
+This project was supported by the Italian Ministry of University and Research, under PRIN grant number 2022CEHEX8.
 
 # References
 [1] Mercatelli, Daniele, et al. "corto: a lightweight R package for gene network inference and master regulator analysis." Bioinformatics, Vol 36, Issue 12, June 2020. DOI: https://doi.org/10.1093/bioinformatics/btaa223
