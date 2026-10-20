@@ -16,7 +16,7 @@ install_github("federicogiorgi/corto")
 
 
 # Introduction
-The _corto_ ("correlation tool") package provides a pipeline to infer networks between "centroid" and "target" variables in a dataset, using a combination of Pearson correlation and Data Processing Inequality (DPI), first proposed in [1]. The main application of _corto_ is in the field of Bioinformatics, Transcriptomics and Metabolomics, where co-occurrence between variables (transcripts, metabolites, or both) can be used as a mean to infer regulatory mechanisms [2], gene functions [3], or metabolite abundances (Cavicchioli et al., 2022 PMID: 35409231). In this field, usually the tested features are genes (or rather, their expression profile across samples), metabolites, or any quantifiable biological molecule, whereas the centroids are Transcription Factors (TFs) and their targets are Target Genes (TGs). The TF-TG co-expression can hint at a causal regulatory relationship, as proven in many studies [4,5,6]. The _corto_ tool replicates the well-established pipeline of the ARACNe family of tools [8,9,10]
+The _corto_ ("correlation tool") package provides a pipeline to infer networks between "centroid" and "target" variables in a dataset, using a combination of Pearson correlation and Data Processing Inequality (DPI), first proposed in [16]. The main application of _corto_ is in the field of Bioinformatics, Transcriptomics and Metabolomics, where co-occurrence between variables (transcripts, metabolites, or both) can be used as a mean to infer regulatory mechanisms [2], gene functions [3], or metabolite abundances (Cavicchioli et al., 2022 PMID: 35409231). In this field, usually the tested features are genes (or rather, their expression profile across samples), metabolites, or any quantifiable biological molecule, whereas the centroids are Transcription Factors (TFs) and their targets are Target Genes (TGs). The TF-TG co-expression can hint at a causal regulatory relationship, as proven in many studies [4,5,6]. The _corto_ tool follows the well-established pipeline of the ARACNe family of tools [7,8,9], using Pearson correlation instead of mutual information and, by default, a simplified DPI step (see below).
 
 _corto_ focuses on tho aspects:
 
@@ -27,15 +27,15 @@ _corto_ focuses on tho aspects:
 ## The _corto_ Gene Network Inference Algorithm
 In brief, _corto_ operates using the following steps:
 
-1. Load a gene expression matrix and a list of user-provided centroids (e.g. TFs). Data should be normalized via Variance Stabilizing Transformation (VST) for RNA-Seq, and Robust Multiarray Average (RMA) for microarrays, as described in [1].
-2. Removal of genes with zero variance across the dataset and rank-transformation of each gene expression profile.
-3. Calculate all pairwise Pearson correlation coefficients between centroid and target features. The rank transformation operated by the Pearson correlation coefficient is a common procedure used in co-expression based studies, due to its benefits in reducing the effects of outliers [1].
+1. Load a gene expression matrix and a list of user-provided centroids (e.g. TFs). Data should be normalized via Variance Stabilizing Transformation (VST) for RNA-Seq, and Robust Multiarray Average (RMA) for microarrays, as described in [10].
+2. Removal of features with zero variance across the dataset.
+3. Calculate all pairwise Pearson correlation coefficients between centroid and target features, on the input matrix as provided. _corto_ does not rank-transform the data: to work on ranks (i.e. Spearman correlation), a common procedure in co-expression based studies due to its benefits in reducing the effects of outliers [11], rank-transform each feature profile before running _corto_, e.g. `inmat<-t(apply(inmat,1,rank))`.
 4. Filter out all centroid-target features whose correlation coefficient _absolute value_ is below the provided p-value threshold _p_.
-5. Apply DPI to all centroid-centroid-target triplets, in order to identify which centroid-target correlation is stronger and identify the most likely association (e.g. which TF is the most likely regulator of the TG in the dataset).
-6. All edges are tested for Data Processing Inequality in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [8]). This step can be run in parallel by specifiying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
+5. Apply DPI to the centroid-target edges. By default (`dpi="target"`), for each target only the edge from the centroid with the strongest absolute correlation is kept, i.e. the most likely regulator of the TG in the dataset (tied centroids are all kept). Alternatively, `dpi="triangle"` applies the ARACNe rule to all centroid-centroid-target triplets: an edge is removed only if it is the weakest of the three edges of a triplet, so that co-regulators of the same target that are not correlated with each other keep their edges. The triangle rule produces larger networks, closer to those of ARACNe, at a considerably higher computing time.
+6. All edges are tested for Data Processing Inequality, with the same rule, in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [8]). This step can be run in parallel by specifiying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
 7. A network is generated in the form of a list, where each element is a centroid-based list of targets. In order to follow the structure of the _regulon_ class implemented by downstream analysis packages (e.g. VIPER [12]), each target is characterized by two parameters:
     + The _tfmode_, the mode of action, i.e. the Pearson correlation coefficient between the target and the centroid in the original input matrix
-    + The _likelihood_ of the interaction, calculated as the number of bootstraps in which the edge survives DPI, divided by the total number of bootstraps (in this impelmentation, the presence of an edge in the original, non-bootstrapped matrix is considered as an additional evidence)
+    + The _likelihood_ of the interaction, calculated as the number of bootstraps in which the edge survives DPI, divided by the total number of bootstraps plus one (in this implementation, the presence of an edge in the original, non-bootstrapped matrix is considered as an additional evidence)
 
 
 # Running _corto_
@@ -125,7 +125,7 @@ If a single named vector is provided (names are features, values are signature v
 ```{r mra4}
 predicted<-mra(signature,regulon=regulon)
 ```
-For the contrast and the signature versions of the mra() function, a mraplot() function can be applied to the output, in order to graphically show the most significant centroids (figure from [16])
+For the contrast and the signature versions of the mra() function, a mraplot() function can be applied to the output, in order to graphically show the most significant centroids (figure from [1])
 ```{r mra3}
 mraplot(predicted)
 ```
@@ -155,7 +155,7 @@ The development of this project (particularly the recent additions on metabolite
 
 [10] Giorgi, Federico M., et al. "Comparative study of RNA-seq-and microarray-derived coexpression networks in Arabidopsis thaliana." Bioinformatics 29.6 (2013): 717-724.
 
-[1] Usadel, Björn, et al. "Co‐expression tools for plant biology: opportunities for hypothesis generation and caveats." Plant, cell & environment 32.12 (2009): 1633-1651.
+[11] Usadel, Björn, et al. "Co‐expression tools for plant biology: opportunities for hypothesis generation and caveats." Plant, cell & environment 32.12 (2009): 1633-1651.
 
 [12] Alvarez, Mariano J., Federico Giorgi, and Andrea Califano. "Using viper, a package for Virtual Inference of Protein-activity by Enriched Regulon analysis." Bioconductor (2014): 1-14.
 
