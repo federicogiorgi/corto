@@ -536,9 +536,12 @@ mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis",pthr=0.
 
         # text(0,0.5,labels="-",pos=4,cex=12,font=1)
         # text(length(ranksig),0.5,labels="+",pos=2,cex=10,font=1)
-        uparrow<-intToUtf8(8593)
-        dnarrow<-intToUtf8(8595)
-        text(length(ranksig)/2,0.5,labels=paste0(dnarrow,"   ",uparrow),pos=NULL,cex=5,font=2)
+        # Down and up arrows in the middle, drawn rather than typed so that
+        # they do not depend on the fonts of the graphics device
+        mid<-length(ranksig)/2
+        gap<-0.075*length(ranksig)
+        arrows(mid-gap,0.85,mid-gap,0.12,lwd=4,length=0.16,angle=35)
+        arrows(mid+gap,0.12,mid+gap,0.85,lwd=4,length=0.16,angle=35)
         par(mar=opar)
 
         ### Keep blank to separate from the next MR
