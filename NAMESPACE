@@ -2,6 +2,7 @@
 
 export(barplot2)
 export(corto)
+export(dpi_edges)
 export(filter_regulon)
 export(fisherp)
 export(getregulon)

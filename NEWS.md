@@ -1,3 +1,29 @@
+# corto 1.4.0
+
+## New features
+
+* `corto()` gains a `dpi` argument to select the Data Processing Inequality
+  rule. The default, `"target"`, is the rule used so far: for each target only
+  the edge from the centroid with the strongest absolute correlation survives,
+  and results are identical to previous versions. `"triangle"` applies the
+  ARACNe rule, removing an edge only if it is the weakest in a
+  centroid-centroid-target triangle; it produces larger networks, closer to
+  those of ARACNe, at a considerably higher computing time. Proposed and
+  implemented by Hugo Tovar (#16).
+
+* New exported `dpi_edges()`, which applies either DPI rule to any list of
+  centroid-target edges.
+
+## Documentation
+
+* The package description, the vignette and the `corto()` help page now
+  describe the DPI step as it is actually performed. They previously
+  described the ARACNe triangle rule, while `corto()` applied the per-target
+  rule (#16).
+* The vignette no longer states that correlations are calculated on ranks:
+  `corto()` uses Pearson correlation on the input matrix as provided. Rank the
+  matrix beforehand to work on Spearman correlations.
+
 # corto 1.3.1
 
 ## New features

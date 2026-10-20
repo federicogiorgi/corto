@@ -12,7 +12,8 @@ corto(
   nthreads = 1,
   verbose = FALSE,
   cnvmat = NULL,
-  boot_threshold = 0
+  boot_threshold = 0,
+  dpi = c("target", "triangle")
 )
 }
 \arguments{
@@ -38,6 +39,11 @@ of each linear model exp~cnv. Default is NULL}
 \item{boot_threshold}{The fraction of bootstraps in which the edge should appear
 to be included in the final network. It can be any number between 0.0 and 1.0.
 Default is 0.0.}
+
+\item{dpi}{The DPI rule, passed to \code{\link{dpi_edges}}: \code{"target"}
+(default, one winning centroid per target, as in previous versions) or
+\code{"triangle"} (the ARACNe rule over centroid-centroid-target triangles).
+See Details.}
 }
 \value{
 A list (object of class regulon), where each element is a centroid
@@ -50,6 +56,28 @@ A list (object of class regulon), where each element is a centroid
 \description{
 This function applies Correlation and DPI to generate a robust
 regulon object based on the input data matrix and the selected centroids.
+}
+\details{
+All centroid-target Pearson correlations are calculated on \code{inmat} as
+provided (no rank transformation is applied: rank the matrix beforehand to
+work on Spearman correlations), and the edges whose absolute correlation
+passes the threshold derived from \code{p} are kept. The Data Processing
+Inequality (DPI) is then applied to these edges on the original matrix and on
+every bootstrapped matrix, and the likelihood of an edge is the number of
+times it survives DPI divided by \code{nbootstraps+1}.
+
+Two DPI rules are available (see \code{\link{dpi_edges}}):
+\itemize{
+  \item \code{"target"} (default): for each target, only the edge from the
+  centroid with the highest absolute correlation survives. This assumes one
+  regulator per target: co-regulators of the same target are only retained
+  through bootstrap variability.
+  \item \code{"triangle"}: the ARACNe rule. An edge is removed only if it is
+  the weakest edge of a centroid-centroid-target triangle, so co-regulators
+  that are not correlated with each other keep their edges. The centroid-centroid
+  correlations are calculated on the same (bootstrapped) matrix. Networks are
+  larger and closer to those of ARACNe, at a considerably higher computing time.
+}
 }
 \examples{
 # Load data matrix inmat (from TCGA mesothelioma project)

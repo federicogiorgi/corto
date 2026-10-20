@@ -1,7 +1,7 @@
 Package: corto
 Type: Package
 Title: Inference of Gene Regulatory Networks
-Version: 1.3.1
+Version: 1.4.0
 Authors@R: c(
  person("Federico M.","Giorgi",email = "federico.giorgi@gmail.com",role=c("aut","cre")),
  person("Daniele","Mercatelli",email = "danielemercatelli@gmail.com",role="ctb"),
@@ -14,8 +14,10 @@ Description: We present 'corto' (Correlation Tool), a simple package to infer
  data using DPI (Data Processing Inequality) and bootstrapping to recover edges.
  An initial step is performed to calculate all significant
  edges between a list of source nodes (centroids) and target genes.
- Then all triplets containing two centroids and one target are tested
- in a DPI step which removes edges. A bootstrapping process then calculates
+ Then a DPI step removes edges: by default, for each target only the edge
+ from the centroid with the strongest correlation is kept; optionally, the
+ ARACNe rule removes an edge only if it is the weakest in a triplet of two
+ centroids and one target. A bootstrapping process then calculates
  the robustness of the network, eventually re-adding edges previously removed by DPI.
  The algorithm has been optimized to run outside a computing cluster, using a fast correlation
  implementation. The package finally provides functions to calculate network enrichment
@@ -38,4 +40,4 @@ Suggests:
  knitr,
  rmarkdown
 VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0
