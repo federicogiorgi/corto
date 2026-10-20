@@ -1,4 +1,4 @@
-#' Perform Master Regulator Analysis (mra).
+#' Perform Master Regulator Analysis (mra)
 #'
 #' The analysis is performed between two groups of samples in the form of expression matrices,
 #' with genes/features as rows and samples as columns.
@@ -15,7 +15,7 @@
 #' @param nperm The number of times the input data will be permuted to generate null signatures.
 #' Default is 1000 if expmat2 or a signature vector is provided, and 10 if only expmat1 is
 #' provided (single sample mra).
-#' @param nthreads The number of threads to use for generating null signatures. Default is 1
+#' @param nthreads The number of threads to use for generating null signatures. Default is 2
 #' @param atacseq An optional 3 column matrix derived from an ATAC-Seq analysis, indicating
 #' 1) gene symbol, 2) -log10(FDR)*sing(log2FC) of an ATAC-Seq design, 3) distance from TSS.
 #' If provided, the output will contain an _atacseq_ field.

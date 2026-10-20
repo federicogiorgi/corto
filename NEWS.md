@@ -1,3 +1,9 @@
+# corto (development version)
+
+* Documented default of `mra(nthreads=)` corrected to 2.
+* Software name 'ARACNe' quoted in the package description.
+* Vignette references corrected and completed.
+
 # corto 1.4.0
 
 ## New features

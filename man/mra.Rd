@@ -2,7 +2,7 @@
 % Please edit documentation in R/mra.R
 \name{mra}
 \alias{mra}
-\title{Perform Master Regulator Analysis (mra).}
+\title{Perform Master Regulator Analysis (mra)}
 \usage{
 mra(
   expmat1,
@@ -34,7 +34,7 @@ If provided, it will be considered as the "control" or "reference" sample set fo
 Default is 1000 if expmat2 or a signature vector is provided, and 10 if only expmat1 is
 provided (single sample mra).}
 
-\item{nthreads}{The number of threads to use for generating null signatures. Default is 1}
+\item{nthreads}{The number of threads to use for generating null signatures. Default is 2}
 
 \item{verbose}{Boolean, whether to print full messages on progress analysis. Default is FALSE}
 
