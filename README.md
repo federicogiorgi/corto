@@ -110,19 +110,24 @@ __corto__ provides a function, mra(), to apply a previously calculated network t
 In all cases, mra() returns a list with the same four fields: _nes_ (the Normalized Enrichment Scores), _pvalue_, _sig_ (the signature used) and _regulon_ (filtered for _minsize_).
 
 ## Sample-by-sample centroid prediction
-The network (regulon in the example below) is directly applied to a multi-sample dataset in the form of a matrix (expmat in the example below), where columns are samples and rows are targets (e.g. transcripts). In this case, _nes_ is a matrix with the same number of samples, including as rows the predicted centroids. The scores are intended as Normalized Enrichment Scores (NESs), based on a normalized T-test for one sample vs. the rest dataset. The NES is positive if the centroid network is higher in the sample vs the mean of the dataset, negative if lower.
+The network (regulon in the example below) is directly applied to a multi-sample dataset in the form of a matrix, where columns are samples and rows are targets (e.g. transcripts). For simplicity, all examples in this section use the same mesothelioma dataset (inmat) on which the network was generated. In this case, _nes_ is a matrix with the same number of samples, including as rows the predicted centroids. The scores are intended as Normalized Enrichment Scores (NESs), based on a normalized T-test for one sample vs. the rest dataset. The NES is positive if the centroid network is higher in the sample vs the mean of the dataset, negative if lower.
 ```r
-predicted<-mra(expmat,regulon=regulon)
+predicted<-mra(inmat,regulon=regulon)
 predicted$nes[1:5,1:5]
 ```
 ## Contrast centroid prediction
-As in the previous procedure, but the centroid score is provided as a differential NES between two sample groups (expmat1 and expmat2 in the example below). The resulting NES is positive if the centroid network is upregulated in expmat1 vs expmat2 (or in expmat1 vs the mean of the dataset), negative if downregulated.
+As in the previous procedure, but the centroid score is provided as a differential NES between two sample groups (expmat1 and expmat2, the first two arguments of mra()). The resulting NES is positive if the centroid network is upregulated in expmat1 vs expmat2, negative if downregulated. In this example, the samples are split in two groups by the expression of BAP1, a tumor suppressor frequently lost in mesothelioma:
 ```r
-predicted<-mra(expmat1,expmat2,regulon)
+bap1<-inmat["BAP1",]
+bap1low<-inmat[,bap1<median(bap1)]
+bap1high<-inmat[,bap1>=median(bap1)]
+predicted<-mra(bap1low,bap1high,regulon=regulon)
 ```
 ## Signature centroid prediction
-If a single named vector is provided (names are features, values are signature values such as T-test statistics or log2 fold changes), the centroid score is calculated on that signature alone, against a null model of shuffled signatures.
+If a single named vector is provided (names are features, values are signature values such as T-test statistics or log2 fold changes), the centroid score is calculated on that signature alone, against a null model of shuffled signatures. Here, the signature is a Welch T-test statistic between the two groups above (features with zero variance give NaN values, which mra() ignores):
 ```r
+signature<-(rowMeans(bap1low)-rowMeans(bap1high))/
+  sqrt(apply(bap1low,1,var)/ncol(bap1low)+apply(bap1high,1,var)/ncol(bap1high))
 predicted<-mra(signature,regulon=regulon)
 ```
 For the contrast and the signature versions of the mra() function, a mraplot() function can be applied to the output, in order to graphically show the most significant centroids (figure from [1])
