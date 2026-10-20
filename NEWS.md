@@ -4,7 +4,9 @@
 * `mraplot()` draws its down/up arrows as lines rather than Unicode characters,
   which were missing from PDF output on Windows.
 * Software name 'ARACNe' quoted in the package description.
-* Vignette references corrected and completed.
+* The vignette now matches the README: same introduction and algorithm
+  steps, a section on `mra()` and `mraplot()`, and the same corrected
+  references, numbered in order of citation.
 
 # corto 1.4.0
 
