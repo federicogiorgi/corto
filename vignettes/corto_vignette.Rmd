@@ -35,7 +35,7 @@ In brief, _corto_ operates using the following steps:
 3. Calculate all pairwise Pearson correlation coefficients between centroid and target features, on the input matrix as provided. _corto_ does not rank-transform the data: to work on ranks (i.e. Spearman correlation), a common procedure in co-expression based studies due to its benefits in reducing the effects of outliers [13], rank-transform each feature profile before running _corto_, e.g. `inmat<-t(apply(inmat,1,rank))`.
 4. Filter out all centroid-target features whose correlation coefficient _absolute value_ is below the provided p-value threshold _p_.
 5. Apply DPI to the centroid-target edges. By default (`dpi="target"`), for each target only the edge from the centroid with the strongest absolute correlation is kept, i.e. the most likely regulator of the TG in the dataset (tied centroids are all kept). Alternatively, `dpi="triangle"` applies the ARACNe rule to all centroid-centroid-target triplets: an edge is removed only if it is the weakest of the three edges of a triplet, so that co-regulators of the same target that are not correlated with each other keep their edges. The triangle rule produces larger networks, closer to those of ARACNe, at a considerably higher computing time.
-6. All edges are tested for Data Processing Inequality, with the same rule, in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNE-AP [10]). This step can be run in parallel by specifying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
+6. All edges are tested for Data Processing Inequality, with the same rule, in a number of bootstrapped versions of the same input matrix (specified by the _nbootstraps_ parameter, 100 by default, as in ARACNe-AP [10]). This step can be run in parallel by specifying the number of threads using the _nthreads_ parameter. The number of occurrences of each edge (if they survived DPI) is calculated. This number can range from 0 (the edge is not significant in any bootstrap) to _nbootstraps_+1 (the edge is significant in all bootstraps, and also in the original matrix).
 7. A network is generated in the form of a list, where each element is a centroid-based list of targets. In order to follow the structure of the _regulon_ class implemented by downstream analysis packages (e.g. VIPER [14]), each target is characterized by two parameters:
     + The _tfmode_, the mode of action, i.e. the Pearson correlation coefficient between the target and the centroid in the original input matrix
     + The _likelihood_ of the interaction, calculated as the number of bootstraps in which the edge survives DPI, divided by the total number of bootstraps plus one (in this implementation, the presence of an edge in the original, non-bootstrapped matrix is considered as an additional evidence)
@@ -142,36 +142,36 @@ mraplot(predicted)
 The development of this project (particularly the recent additions on metabolite-transcript network inference) was supported by the Italian Ministry of University and Research, under PRIN grant number 2022CEHEX8.
 
 # References
-[1] Mercatelli, Daniele, et al. "corto: a lightweight R package for gene network inference and master regulator analysis." Bioinformatics, Vol 36, Issue 12, June 2020. DOI: https://doi.org/10.1093/bioinformatics/btaa223
+[1] Mercatelli, Daniele, Gonzalo Lopez-Garcia, and Federico M. Giorgi. "corto: a lightweight R package for gene network inference and master regulator analysis." Bioinformatics 36.12 (2020): 3916-3917. DOI: https://doi.org/10.1093/bioinformatics/btaa223
 
-[2] Reverter, Antonio, and Eva KF Chan. "Combining partial correlation and an information theory approach to the reversed engineering of gene co-expression networks." Bioinformatics 24.21 (2008): 2491-2497.
+[2] Reverter, Antonio, and Eva KF Chan. "Combining partial correlation and an information theory approach to the reversed engineering of gene co-expression networks." Bioinformatics 24.21 (2008): 2491-2497. DOI: https://doi.org/10.1093/bioinformatics/btn482
 
-[3] D’Haeseleer, Patrik, Shoudan Liang, and Roland Somogyi. "Genetic network inference: from co-expression clustering to reverse engineering." Bioinformatics 16.8 (2000): 707-726.
+[3] D'haeseleer, Patrik, Shoudan Liang, and Roland Somogyi. "Genetic network inference: from co-expression clustering to reverse engineering." Bioinformatics 16.8 (2000): 707-726. DOI: https://doi.org/10.1093/bioinformatics/16.8.707
 
-[4] Hansen, Bjoern O., et al. "Elucidating gene function and function evolution through comparison of co-expression networks of plants." Frontiers in plant science 5 (2014): 394.
+[4] Hansen, Bjoern O., et al. "Elucidating gene function and function evolution through comparison of co-expression networks of plants." Frontiers in Plant Science 5 (2014): 394. DOI: https://doi.org/10.3389/fpls.2014.00394
 
 [5] Cavicchioli, Maria Vittoria, et al. "Prediction of metabolic profiles from transcriptomics data in human cancer cell lines." International Journal of Molecular Sciences 23.7 (2022): 3867. DOI: https://doi.org/10.3390/ijms23073867
 
-[6] Basso, Katia, et al. "Reverse engineering of regulatory networks in human B cells." Nature genetics 37.4 (2005): 382-390.
+[6] Basso, Katia, et al. "Reverse engineering of regulatory networks in human B cells." Nature Genetics 37.4 (2005): 382-390. DOI: https://doi.org/10.1038/ng1532
 
-[7] Amar, David, Hershel Safer, and Ron Shamir. "Dissection of regulatory networks that are altered in disease via differential co-expression." PLoS computational biology 9.3 (2013): e1002955.
+[7] Amar, David, Hershel Safer, and Ron Shamir. "Dissection of regulatory networks that are altered in disease via differential co-expression." PLoS Computational Biology 9.3 (2013): e1002955. DOI: https://doi.org/10.1371/journal.pcbi.1002955
 
-[8] Vandepoele, Klaas, et al. "Unraveling transcriptional control in Arabidopsis using cis-regulatory elements and coexpression networks." Plant physiology 150.2 (2009): 535-546.
+[8] Vandepoele, Klaas, et al. "Unraveling transcriptional control in Arabidopsis using cis-regulatory elements and coexpression networks." Plant Physiology 150.2 (2009): 535-546. DOI: https://doi.org/10.1104/pp.109.136028
 
-[9] Margolin, Adam A., et al. "ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context." BMC bioinformatics 7.Suppl 1 (2006): S7.
+[9] Margolin, Adam A., et al. "ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context." BMC Bioinformatics 7.Suppl 1 (2006): S7. DOI: https://doi.org/10.1186/1471-2105-7-S1-S7
 
-[10] Lachmann, Alexander, et al. "ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information." Bioinformatics 32.14 (2016): 2233-2235.
+[10] Lachmann, Alexander, et al. "ARACNe-AP: gene network reverse engineering through adaptive partitioning inference of mutual information." Bioinformatics 32.14 (2016): 2233-2235. DOI: https://doi.org/10.1093/bioinformatics/btw216
 
-[11] Khatamian, Alireza, et al. "SJARACNe: a scalable software tool for gene network reverse engineering from big data." Bioinformatics 35.12 (2019): 2165-2166.
+[11] Khatamian, Alireza, et al. "SJARACNe: a scalable software tool for gene network reverse engineering from big data." Bioinformatics 35.12 (2019): 2165-2166. DOI: https://doi.org/10.1093/bioinformatics/bty907
 
-[12] Giorgi, Federico M., et al. "Comparative study of RNA-seq-and microarray-derived coexpression networks in Arabidopsis thaliana." Bioinformatics 29.6 (2013): 717-724.
+[12] Giorgi, Federico M., et al. "Comparative study of RNA-seq- and microarray-derived coexpression networks in Arabidopsis thaliana." Bioinformatics 29.6 (2013): 717-724. DOI: https://doi.org/10.1093/bioinformatics/btt053
 
-[13] Usadel, Björn, et al. "Co‐expression tools for plant biology: opportunities for hypothesis generation and caveats." Plant, cell & environment 32.12 (2009): 1633-1651.
+[13] Usadel, Björn, et al. "Co-expression tools for plant biology: opportunities for hypothesis generation and caveats." Plant, Cell & Environment 32.12 (2009): 1633-1651. DOI: https://doi.org/10.1111/j.1365-3040.2009.02040.x
 
-[14] Alvarez, Mariano J., Federico Giorgi, and Andrea Califano. "Using viper, a package for Virtual Inference of Protein-activity by Enriched Regulon analysis." Bioconductor (2014): 1-14.
+[14] Alvarez, Mariano J., et al. "Functional characterization of somatic mutations in cancer using network-based inference of protein activity." Nature Genetics 48.8 (2016): 838-847. DOI: https://doi.org/10.1038/ng.3593
 
-[15] Ladanyi, Marc, et al. "The TCGA malignant pleural mesothelioma (MPM) project: VISTA expression and delineation of a novel clinical-molecular subtype of MPM." Journal of Clinical Oncology 36.15_suppl (2018): 8516.
+[15] Hmeljak, Julija, et al. "Integrative molecular characterization of malignant pleural mesothelioma." Cancer Discovery 8.12 (2018): 1548-1565. DOI: https://doi.org/10.1158/2159-8290.CD-18-0804
 
-[16] Gene Ontology Consortium. "The Gene Ontology (GO) database and informatics resource." Nucleic acids research 32.suppl_1 (2004): D258-D261.
+[16] Gene Ontology Consortium. "The Gene Ontology (GO) database and informatics resource." Nucleic Acids Research 32.suppl_1 (2004): D258-D261. DOI: https://doi.org/10.1093/nar/gkh036
 
 [17] Schubert, Michael, et al. "Gene networks in cancer are biased by aneuploidies and sample impurities." Biochimica et Biophysica Acta - Gene Regulatory Mechanisms 1863.6 (2020): 194444. DOI: https://doi.org/10.1016/j.bbagrm.2019.194444
