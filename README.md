@@ -1,6 +1,6 @@
 # corto
 
-[![CRAN version](https://img.shields.io/cran/v/corto?label=CRAN)](https://cran.r-project.org/package=corto)
+[![CRAN version](https://img.shields.io/badge/CRAN-v1.4.1-blue)](https://cran.r-project.org/package=corto)
 [![GitHub version](https://img.shields.io/github/r-package/v/federicogiorgi/corto?label=GitHub)](https://github.com/federicogiorgi/corto/blob/master/DESCRIPTION)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/corto)](https://cran.r-project.org/package=corto)
 
