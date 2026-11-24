@@ -4,6 +4,8 @@
 [![GitHub version](https://img.shields.io/github/r-package/v/federicogiorgi/corto?label=GitHub)](https://github.com/federicogiorgi/corto/blob/master/DESCRIPTION)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/corto)](https://cran.r-project.org/package=corto)
 
+**Latest release: _corto_ 1.4.1**, accepted on CRAN on 24 November 2026, so the CRAN and GitHub versions are the same. See [NEWS.md](NEWS.md) for what changed.
+
 _corto_ (Correlation Tool): an R package to generate correlation-based DPI networks.
 
 To install the _corto_ stable version from CRAN:
