@@ -23,6 +23,49 @@ colorpanel<-function(n,low,mid,high){
     rgb(red,blue,green)
 }
 
+# Welch t statistic of two samples, calculated with the same operations as
+# stats::t.test() (hence the same value), without building the test object
+welcht<-function(x1,x2){
+    x1<-x1[!is.na(x1)]
+    x2<-x2[!is.na(x2)]
+    n1<-length(x1)
+    n2<-length(x2)
+    if(n1<2){
+        stop("not enough 'x' observations")
+    }
+    if(n2<2){
+        stop("not enough 'y' observations")
+    }
+    m1<-mean(x1)
+    m2<-mean(x2)
+    se1<-sqrt(stats::var(x1)/n1)
+    se2<-sqrt(stats::var(x2)/n2)
+    se<-sqrt(se1^2+se2^2)
+    if(se<10*.Machine$double.eps*max(abs(m1),abs(m2))){
+        stop("data are essentially constant")
+    }
+    (m1-m2)/se
+}
+
+# State of the random number generator of the session, NULL if not yet seeded
+rngstate<-function(){
+    if(exists(".Random.seed",envir=globalenv(),inherits=FALSE)){
+        return(get(".Random.seed",envir=globalenv(),inherits=FALSE))
+    }
+    return(NULL)
+}
+
+# Bring the random number generator of the session back to a previous state
+rngrestore<-function(state){
+    if(is.null(state)){
+        if(exists(".Random.seed",envir=globalenv(),inherits=FALSE)){
+            rm(".Random.seed",envir=globalenv())
+        }
+    } else {
+        assign(".Random.seed",state,envir=globalenv())
+    }
+}
+
 # Function to extract correlation indeces
 extract<-function(mat,x,y){
     mat[x+nrow(mat)*(y-1)]
@@ -213,7 +256,8 @@ p2r<-function(p,n){
 #'
 #' @param input A vector of values
 #' @param roundParam How many decimal digits you want
-#' @return A character vector of formatted numebr names
+#' @return A character vector of formatted numebr names. Missing values are
+#' returned as NA
 #' @examples
 #' # Thousands
 #' set.seed(1)
@@ -237,7 +281,9 @@ kmgformat <- function(input, roundParam = 1) {
     absinput <- abs(input)
     output <- c()
     for (i in absinput) {
-        if (i < 1000) {
+        if (is.na(i)) {
+            output <- c(output, NA)
+        } else if (i < 1000) {
             output <- c(output, i)
         } else if (i < 1e+06) {
             i <- round(i/1000, roundParam)
@@ -264,6 +310,7 @@ kmgformat <- function(input, roundParam = 1) {
         }
     }
     output <- paste0(signs, output)
+    output[is.na(input)] <- NA
     return(output)
 }
 
@@ -543,6 +590,8 @@ val2col <- function(z, col1 = "navy", col2 = "white",
 #' @param lower Boolean, whether the lower error bar should be plotted, default FALSE
 #' @param flat Boolean, whether the head of bars should be flat, default TRUE
 #' @param ... Arguments to be passed to the core _barplot_ function
+#' @param ylim Limits of the y axis. Default is NULL, from zero to 1.1 times the
+#' highest bar plus its error
 #' @return A plot
 #' @examples
 #' values<-matrix(rnorm(10*4,mean=10),nrow=4,ncol=10)
@@ -550,13 +599,16 @@ val2col <- function(z, col1 = "navy", col2 = "white",
 #' colnames(values)<-colnames(errors)<-LETTERS[1:10]
 #' barplot2(values,errors,main="Bar plot with error bars")
 #' @export
-barplot2<-function(values,errors,lower=FALSE,flat=TRUE,...){
+barplot2<-function(values,errors,lower=FALSE,flat=TRUE,...,ylim=NULL){
     if(!is.matrix(values)&!is.matrix(errors)){
         values<-t(as.matrix(values))
         errors<-t(as.matrix(errors))
     }
     sums<-values+errors
-    bp<-barplot(values,beside=TRUE,ylim=c(0,1.1*max(sums)),...)
+    if(is.null(ylim)){
+        ylim<-c(0,1.1*max(sums))
+    }
+    bp<-barplot(values,beside=TRUE,ylim=ylim,...)
     if(flat){angle<-90}else{angle<-0}
     for(i in 1:nrow(bp)){
         for(j in 1:ncol(bp)){
@@ -615,7 +667,8 @@ boxOverlap<-function(x1,y1,sw1,sh1,boxes){
 #'
 #' @param x A numeric vector of x coordinates
 #' @param y A numeric vector of y coordinates (must have the same length of x)
-#' @param labels A vector of labels associated with x and y (must have the same length of x)
+#' @param labels A vector of labels associated with x and y (must have the same length of x).
+#' Default is NULL, in which case the names of x are used
 #' @param padding A character object specifying left and right padding for words. Default is a
 #' single whitespace " "
 #' @param rstep Decimal numeric specifying the lateral step length for label distancing.
@@ -674,6 +727,14 @@ textrepel<-function(x,y,
                     add=FALSE,
                     ...
 ){
+    # Labels default to the names of x
+    if(is.null(labels)){
+        labels<-names(x)
+        if(is.null(labels)){
+            stop("Provide labels, or names for x")
+        }
+    }
+
     # Sanity check
     if((length(x)!=length(y))|(length(x)!=length(labels))){
         stop("Length of x, y and labels differ!")
@@ -696,6 +757,12 @@ textrepel<-function(x,y,
     n<-length(labels)
     sdx<-sd(x,na.rm=TRUE)
     sdy<-sd(y,na.rm=TRUE)
+    # When all points coincide there is no spread to scale the displacement of
+    # the labels on: a fraction of the plot region is used instead
+    if(!isTRUE(sdx>0)&&!isTRUE(sdy>0)){
+        sdx<-diff(par("usr")[1:2])/10
+        sdy<-diff(par("usr")[3:4])/10
+    }
     if(length(textSize)==1){textSize<-rep(textSize,n)}
     if(length(vertical)==1){vertical<-rep(vertical, n)}
 

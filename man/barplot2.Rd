@@ -4,7 +4,7 @@
 \alias{barplot2}
 \title{barplot2 - Bar plot with upper error bars}
 \usage{
-barplot2(values, errors, lower = FALSE, flat = TRUE, ...)
+barplot2(values, errors, lower = FALSE, flat = TRUE, ..., ylim = NULL)
 }
 \arguments{
 \item{values}{A matrix of values}
@@ -16,6 +16,9 @@ barplot2(values, errors, lower = FALSE, flat = TRUE, ...)
 \item{flat}{Boolean, whether the head of bars should be flat, default TRUE}
 
 \item{...}{Arguments to be passed to the core _barplot_ function}
+
+\item{ylim}{Limits of the y axis. Default is NULL, from zero to 1.1 times the
+highest bar plus its error}
 }
 \value{
 A plot

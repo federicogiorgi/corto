@@ -29,7 +29,8 @@ textrepel(
 
 \item{y}{A numeric vector of y coordinates (must have the same length of x)}
 
-\item{labels}{A vector of labels associated with x and y (must have the same length of x)}
+\item{labels}{A vector of labels associated with x and y (must have the same length of x).
+Default is NULL, in which case the names of x are used}
 
 \item{padding}{A character object specifying left and right padding for words. Default is a
 single whitespace " "}

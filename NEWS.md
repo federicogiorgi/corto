@@ -1,3 +1,42 @@
+# corto 1.4.2
+
+## Bug fixes
+
+* `mra()` failed in the two-matrix and sample-by-sample modes when a single
+  centroid was left after `minsize` filtering.
+* `mra()` now stops with an informative message when no centroid has at least
+  `minsize` targets. It previously returned an empty result with a NES of 0
+  (two-matrix and sample-by-sample modes) or an unrelated error (signature
+  mode).
+* `mraplot()` restores the layout and the graphical parameters of the device
+  when it exits. Plots drawn after it ended up in its last panel, or failed
+  with "figure margins too large".
+* `mraplot()` no longer fails when `mrs` is larger than the number of analyzed
+  centroids, and names the requested centroids that are not in the results.
+* `corto()` and `mra()` close their worker processes also when they stop with
+  an error.
+* `corto()` and `mra()` no longer alter the random number stream of the
+  session. With `nthreads=1` on Linux and macOS the bootstraps and permutations
+  run in the calling session, and their fixed seeds replaced the seed set by
+  the user.
+* `textrepel()`: `labels` now defaults to the names of `x` (the documented
+  default, `NULL`, always failed), and the function no longer hangs when all
+  points have the same coordinates.
+* `gsea()` stops with an informative message when the set has no element in
+  `reflist`, when it contains all of them, or when `reflist` has no names.
+* `kmgformat()` returns `NA` for missing values instead of failing.
+* `barplot2()` gains a `ylim` argument. Passing `ylim` used to fail, as the
+  function set it internally.
+
+## Performance
+
+* `corto()` bootstraps only the features with at least one edge passing the
+  correlation threshold: about 5x faster on a 20000 x 400 matrix.
+* `mra()` in two-matrix mode calculates the Welch statistics directly instead
+  of calling `t.test()` for every feature and permutation, about 2.5x faster,
+  and no longer ships its whole environment to the workers.
+* Results are bit-identical to version 1.4.1.
+
 # corto 1.4.1
 
 * Documented default of `mra(nthreads=)` corrected to 2.

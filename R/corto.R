@@ -123,6 +123,10 @@ dpi_edges<-function(centroid,target,cor,rule=c("target","triangle"),centroid_cor
 corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE,cnvmat=NULL,
                 boot_threshold=0.0,dpi=c("target","triangle")){
   dpi<-match.arg(dpi)
+  # The bootstraps set their own seeds: the random number stream of the calling
+  # session is left as it was found
+  oldrng<-rngstate()
+  on.exit(rngrestore(oldrng),add=TRUE)
   if(sum(is.na(inmat))>0){
     stop("Input matrix contains NA fields")
   }
@@ -263,6 +267,10 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
     }
   }
 
+  # Features without edges are not needed anymore: the bootstraps only test
+  # the edges that passed the threshold in the original matrix
+  tmat<-tmat[,colnames(tmat)%in%selected_nodes,drop=FALSE]
+
   # DPI on the original matrix
   # Appearing in the original matrix counts as one evidence
   occurrences<-as.numeric(dpimat(edges,tmat,dpi))
@@ -274,13 +282,13 @@ corto<-function(inmat,centroids,nbootstraps=100,p=1E-30,nthreads=1,verbose=FALSE
 
   # The pbapply snippet ----
   cl<-parallel::makeCluster(nthreads)
+  on.exit(parallel::stopCluster(cl),add=TRUE)
   winnerlist<-unlist(pblapply(cl=cl,
                               X=1:nbootstraps,
                               FUN=funboot,
                               tmat=tmat,centroids=centroids,r=r,selected_edges=selected_edges,
                               dpi=dpi
   ))
-  parallel::stopCluster(cl)
 
   # Add occurrences
   add<-table(winnerlist)

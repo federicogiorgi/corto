@@ -33,6 +33,19 @@ gsea <- function(reflist,
     # Get elements in set that are in the ref list
     set <- intersect(names(reflist), set)
 
+    # A permutation null needs elements both inside and outside the set
+    if(is.null(gsea_null)){
+        if(is.null(names(reflist))){
+            stop("reflist must be a named vector")
+        }
+        if(length(set)==0){
+            stop("None of the elements of set is among the names of reflist")
+        }
+        if(all(names(reflist) %in% set)){
+            stop("All the elements of reflist are in set")
+        }
+    }
+
     # Sort the reference list
     # Get the list order, from higher (1)to smaller (n)
     ix <- order(reflist, decreasing=TRUE)
@@ -86,7 +99,7 @@ gsea <- function(reflist,
         ledge_indeces <- which(ledge_indeces == 1)
         ledge_names <- names(reflist[ledge_indeces])
     } else{ # Case 2: positive ES
-        peak <- which(running_score==max(running_score)) # Define the peak point
+        peak <- which(running_score==max(running_score))[1] # Define the peak point
         # Leading edge is stuff BEFORE the peak point (ES is positive)
         ledge_indeces[1:peak] <- 1
         ledge_indeces <- which(ledge_indeces == 1)

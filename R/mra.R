@@ -47,9 +47,17 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 
 
 
+    # The permutations set their own seeds: the random number stream of the
+    # calling session is left as it was found
+    oldrng<-rngstate()
+    on.exit(rngrestore(oldrng),add=TRUE)
+
     # Filter by minsize
     regsizes<-sapply(regulon,function(x){length(x$likelihood)})
     regulon<-regulon[regsizes>=minsize]
+    if(length(regulon)==0){
+        stop("No centroid in the regulon has at least ",minsize," targets, try a lower minsize")
+    }
     regsizes<-regsizes[names(regulon)]
 
     # First we create a centroid/target matrix
@@ -61,6 +69,13 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
         vec<-sign(regulon[[centroid]]$tfmode)*regulon[[centroid]]$likelihood
         netmat[centroid,names(vec)]<-vec
     }
+
+    # Permutations run in their own environment, so that the objects of this
+    # function are not shipped to the workers together with the permutation jobs
+    nullenv<-new.env(parent=baseenv())
+    nullwelcht<-welcht
+    environment(nullwelcht)<-nullenv
+    nullenv$welcht<-nullwelcht
 
     # Case 0: expmat1 is a signature
     if(is.vector(expmat1)){
@@ -84,19 +99,20 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
         # Permuted signatures
         nullsigperm0<-function(seed=0,sig,netmat){
             set.seed(seed)
-            nullsig<-setNames(sample(sig),names(sig))
+            nullsig<-stats::setNames(sample(sig),names(sig))
             nullscores<-(netmat%*%nullsig)[,1]
             return(nullscores)
         }
+        environment(nullsigperm0)<-nullenv
 
         # The pbapply snippet
         cl<-parallel::makeCluster(nthreads)
+        on.exit(parallel::stopCluster(cl),add=TRUE)
         nullscores<-pblapply(cl=cl,
                              X=1:nperm,
                              FUN=nullsigperm0,
                              sig=sig,netmat=netmat
         )
-        parallel::stopCluster(cl)
         nullscores<-do.call(cbind,nullscores)
 
         # Compare scores with nullscores
@@ -141,8 +157,7 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
         sig<-setNames(apply(cbind(expmat1,expmat2),1,function(x){
             x1<-x[1:ncol(expmat1)]
             x2<-x[(ncol(expmat1)+1):length(x)]
-            tt<-t.test(x1,x2)
-            return(tt$statistic)
+            return(welcht(x1,x2))
         }),rownames(expmat1))
         sig<-sig[!is.na(sig)]
         common<-intersect(names(sig),colnames(netmat))
@@ -151,11 +166,7 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 
         # Then we slightly reduce the contribution of targets shared by multiple centroids
         # But only targets in the signature
-        netmat2<-apply(netmat,2,function(x){x/(sum(x!=0)^0.5)})
-        # plot(netmat[,1:20],netmat2[,1:20])
-        # abline(h=0,v=0)
-        netmat<-netmat2
-        rm(netmat2)
+        netmat<-t(t(netmat)/(colSums(netmat!=0)^0.5))
 
         # # Then we normalize by regulon length, otherwise TFs with small networks will be penalized
         # netmat<-t(apply(netmat,1,function(x){10*x/sum(abs(x))}))
@@ -179,32 +190,26 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
             set.seed(seed)
             permat<-permat[sample(nrow(permat)),]
             permat<-permat[,sample(ncol(permat))]
-            nullsig<-setNames(apply(permat,1,function(x){
-                if(!is.null(expmat2)){
-                    x1<-x[1:ncol(expmat1)]
-                    x2<-x[(ncol(expmat1)+1):length(x)]
-                    tt<-t.test(x1,x2)
-                } else {
-                    x<-x-mean(x)
-                    tt<-t.test(x)
-                }
-                return(tt$statistic)
+            n1<-ncol(expmat1)
+            nullsig<-stats::setNames(apply(permat,1,function(x){
+                x1<-x[1:n1]
+                x2<-x[(n1+1):length(x)]
+                return(welcht(x1,x2))
             }),rownames(permat))
             nullsig<-nullsig[colnames(netmat)]
             nullscores<-(netmat%*%nullsig)[,1]
             return(nullscores)
         }
+        environment(nullsigperm1)<-nullenv
 
         # The pbapply snippet
         cl<-parallel::makeCluster(nthreads)
-        #invisible(parallel::clusterExport(cl=cl,varlist=c("nthreads")))
-        #invisible(parallel::clusterEvalQ(cl= cl,library(dplyr)))
+        on.exit(parallel::stopCluster(cl),add=TRUE)
         nullscores<-pblapply(cl=cl,
                              X=1:nperm,
                              FUN=nullsigperm1,
                              expmat1=expmat1,expmat2=expmat2,netmat=netmat
         )
-        parallel::stopCluster(cl)
         nullscores<-do.call(cbind,nullscores)
 
 
@@ -249,7 +254,7 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
 
         # Then we slightly reduce the contribution of targets shared by multiple centroids
         # But only targets in the signature
-        netmat<-apply(netmat,2,function(x){x/(sum(x!=0)^0.5)})
+        netmat<-t(t(netmat)/(colSums(netmat!=0)^0.5))
 
         # Calculate unnormalized scores
         scores<-(netmat%*%sigmat)
@@ -261,7 +266,7 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
             permat<-permat[sample(nrow(permat)),]
             permat<-permat[,sample(ncol(permat))]
             nullsigmat<-t(apply(permat,1,function(x){
-                y<-(x-mean(x))/sd(x)
+                y<-(x-mean(x))/stats::sd(x)
                 return(y)
             }))
             nullsigmat[is.na(nullsigmat)]<-0
@@ -269,17 +274,16 @@ mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verb
             nullscores<-(netmat%*%nullsigmat)
             return(nullscores)
         }
+        environment(nullsigperm2)<-nullenv
 
         # The pbapply snippet
         cl<-parallel::makeCluster(nthreads)
-        #invisible(parallel::clusterExport(cl=cl,varlist=c("nthreads")))
-        #invisible(parallel::clusterEvalQ(cl= cl,library(dplyr)))
+        on.exit(parallel::stopCluster(cl),add=TRUE)
         nullscores<-pblapply(cl=cl,
                              X=1:nperm,
                              FUN=nullsigperm2,
                              expmat1=expmat1,netmat=netmat
         )
-        parallel::stopCluster(cl)
         nullscores<-do.call(cbind,nullscores)
 
         # Compare scores with nullscores
@@ -322,12 +326,22 @@ mraplot<-function(mraobj,mrs=5,title="corto - Master Regulator Analysis",pthr=0.
         stop("Sample-by-sample mra results cannot be plotted by mraplot")
     }
     if(is.numeric(mrs)){
-        mrs<-names(sort(abs(mraobj$nes),decreasing=TRUE))[1:mrs]
+        # No more than the centroids that were analyzed
+        ranked<-names(sort(abs(mraobj$nes),decreasing=TRUE))
+        mrs<-ranked[1:min(mrs,length(ranked))]
     } else if(is.character(mrs)){
-        mrs<-mrs
+        missing<-setdiff(mrs,names(mraobj$nes))
+        if(length(missing)>0){
+            stop("Not present in the mra results: ",paste(missing,collapse=", "))
+        }
     } else {
         stop("Provide mrs as a number to show top mrs, or a vector of mrs")
     }
+
+    # Keep original par device settings and layout
+    on.exit(layout(1))
+    oldpar<-par(no.readonly=TRUE)
+    on.exit(par(oldpar),add=TRUE,after=FALSE)
 
     # Define layout ----
     ltitle<-c(1,1,1,2,2)

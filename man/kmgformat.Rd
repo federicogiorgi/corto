@@ -12,7 +12,8 @@ kmgformat(input, roundParam = 1)
 \item{roundParam}{How many decimal digits you want}
 }
 \value{
-A character vector of formatted numebr names
+A character vector of formatted numebr names. Missing values are
+returned as NA
 }
 \description{
 This function will convert thousand numbers to K, millions to M, billions
