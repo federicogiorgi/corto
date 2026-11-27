@@ -2,8 +2,7 @@
 % Please edit documentation in R/gsea.R
 \name{gsea2}
 \alias{gsea2}
-\title{2-way GSEA
-GSEA Gene set enrichment analysis of two complementary gene sets using gsea}
+\title{2-way GSEA}
 \usage{
 gsea2(
   reflist,
@@ -20,7 +19,7 @@ gsea2(
 
 \item{set1}{element set 1}
 
-\item{set2}{element set 1}
+\item{set2}{element set 2}
 
 \item{method}{one of 'permutation' or 'pareto'}
 
@@ -32,22 +31,31 @@ scores unchanged)}
 \item{gsea_null}{a GSEA null distribution (Optional)}
 }
 \value{
-A list of 2 GSEA objects. Each of which is a list of components:
+A list with the results of \code{\link{gsea}} for the two sets. The
+components are those of a \code{gsea} object, with suffix 1 for \code{set1}
+and 2 for \code{set2}:
 \describe{
-\item{ES}{The enrichment score}
-\item{NES}{The normalized enrichment socre}
-\item{ledge}{The items in the leading edge}
-\item{p.value}{The permutation-based p-value}
+\item{es1, es2}{The enrichment scores}
+\item{nes1, nes2}{The normalized enrichment scores}
+\item{p.value1, p.value2}{The p-values}
+\item{ledge1, ledge2}{The elements in the leading edges}
+\item{running_score1, running_score2}{The running enrichment scores along
+the sorted reference list}
+\item{set1, set2}{The two element sets, as provided}
+\item{reflist}{The reference list, sorted in decreasing order}
+\item{inSet1, inSet2}{Vectors of 0 and 1 marking the positions of the
+sorted reference list that belong to each set}
 }
 }
 \description{
-2-way GSEA
-GSEA Gene set enrichment analysis of two complementary gene sets using gsea
+Gene set enrichment analysis of two element sets on the same reference
+list, using \code{\link{gsea}}
 }
 \examples{
 reflist<-setNames(-sort(rnorm(1000)),paste0('gene',1:1000))
 set1<-paste0('gene',sample(1:200,50))
 set2<-paste0('gene',sample(801:1000,50))
 obj<-gsea2(reflist,set1,set2,method='pareto',np=1000)
-obj$p.value
+obj$p.value1
+obj$p.value2
 }

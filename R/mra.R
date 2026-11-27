@@ -16,9 +16,8 @@
 #' Default is 1000 if expmat2 or a signature vector is provided, and 10 if only expmat1 is
 #' provided (single sample mra).
 #' @param nthreads The number of threads to use for generating null signatures. Default is 2
-#' @param atacseq An optional 3 column matrix derived from an ATAC-Seq analysis, indicating
-#' 1) gene symbol, 2) -log10(FDR)*sing(log2FC) of an ATAC-Seq design, 3) distance from TSS.
-#' If provided, the output will contain an _atacseq_ field.
+#' @param atacseq Currently not used. Reserved for a future integration of ATAC-Seq data;
+#' any value provided is ignored. Default is NULL
 #' @param verbose Boolean, whether to print full messages on progress analysis. Default is FALSE
 #' @return A list summarizing the master regulator analysis
 #' \itemize{
@@ -28,9 +27,6 @@
 #' \item pvalue: the pvalue of the enrichment.
 #' \item sig: the calculated signature (useful for plotting).
 #' \item regulon: the original regulon used in the analysis (but filtered for _minsize_)
-#' \item atac: Optionally present if atacseq data is provided. For each centroid/TF a number
-#' ranging from 0 to 1 will indicate the fraction of changes in activity due to promoter effects
-#' rather than distal effects.
 #' }
 #' @export
 mra<-function(expmat1,expmat2=NULL,regulon,minsize=10,nperm=NULL,nthreads=2,verbose=FALSE,

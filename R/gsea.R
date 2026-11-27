@@ -8,12 +8,19 @@
 #' scores unchanged)
 #' @param np Number of permutations (Default: 1000)
 #' @param gsea_null a GSEA null distribution (Optional)
-#' @return A GSEA object. Basically a list of s components:
+#' @return A list of class \code{gsea}, with components:
 #' \describe{
-#' \item{ES}{The enrichment score}
-#' \item{NES}{The normalized enrichment socre}
-#' \item{ledge}{The items in the leading edge}
-#' \item{p.value}{The permutation-based p-value}
+#' \item{es}{The enrichment score}
+#' \item{nes}{The normalized enrichment score}
+#' \item{p.value}{The p-value, from permutations (refined by a Pareto tail fit
+#' when \code{method='pareto'})}
+#' \item{ledge}{The elements of the set in the leading edge}
+#' \item{running_score}{The running enrichment score along the sorted
+#' reference list}
+#' \item{set}{The elements of the set found in the reference list}
+#' \item{reflist}{The reference list, sorted in decreasing order}
+#' \item{inSet}{A vector of 0 and 1 marking the positions of the sorted
+#' reference list that belong to the set}
 #' }
 #' @examples
 #' reflist<-setNames(-sort(rnorm(1000)),paste0('gene',1:1000))
@@ -509,11 +516,12 @@ p2z <- function(p) {
 
 #' Stouffer integration of Z scores
 #'
-#' This function gives a gaussian Z-score corresponding to the provided p-value
-#' Careful: sign is not provided
+#' This function combines a vector of Z-scores into a single Z-score with the
+#' Stouffer method: the sum of the Z-scores divided by the square root of their
+#' number. Signs are kept, so Z-scores of opposite sign cancel out.
 #'
 #' @param x a vector of Z scores
-#' @return Z an integrated Z score
+#' @return An integrated Z score
 #' @examples
 #' zs<-c(1,3,5,2,3)
 #' stouffer(zs)
@@ -525,12 +533,14 @@ stouffer <- function(x) {
 
 #' Weighted Stouffer integration of Z scores
 #'
-#' This function gives a gaussian Z-score corresponding to the provided p-value
-#' Careful: sign is not provided
+#' This function combines a vector of Z-scores into a single Z-score with the
+#' weighted Stouffer method: the sum of the Z-scores multiplied by their weights,
+#' divided by the square root of the sum of the squared weights. Signs are kept,
+#' so Z-scores of opposite sign cancel out.
 #'
 #' @param x a vector of Z scores
 #' @param w weight for each Z score
-#' @return Z an integrated Z score
+#' @return An integrated Z score
 #' @examples
 #' zs<-c(1,-3,5,2,3)
 #' ws<-c(1,10,1,2,1)
@@ -583,28 +593,39 @@ slice <- function(matrix) {
 }
 
 #' 2-way GSEA
-#' GSEA Gene set enrichment analysis of two complementary gene sets using gsea
+#'
+#' Gene set enrichment analysis of two element sets on the same reference
+#' list, using \code{\link{gsea}}
 #' @param reflist named vector of reference scores
 #' @param set1 element set 1
-#' @param set2 element set 1
+#' @param set2 element set 2
 #' @param method one of 'permutation' or 'pareto'
 #' @param w exponent used to raise the supplied scores. Default is 1 (original
 #' scores unchanged)
 #' @param np Number of permutations (Default: 1000)
 #' @param gsea_null a GSEA null distribution (Optional)
-#' @return A list of 2 GSEA objects. Each of which is a list of components:
+#' @return A list with the results of \code{\link{gsea}} for the two sets. The
+#' components are those of a \code{gsea} object, with suffix 1 for \code{set1}
+#' and 2 for \code{set2}:
 #' \describe{
-#' \item{ES}{The enrichment score}
-#' \item{NES}{The normalized enrichment socre}
-#' \item{ledge}{The items in the leading edge}
-#' \item{p.value}{The permutation-based p-value}
+#' \item{es1, es2}{The enrichment scores}
+#' \item{nes1, nes2}{The normalized enrichment scores}
+#' \item{p.value1, p.value2}{The p-values}
+#' \item{ledge1, ledge2}{The elements in the leading edges}
+#' \item{running_score1, running_score2}{The running enrichment scores along
+#' the sorted reference list}
+#' \item{set1, set2}{The two element sets, as provided}
+#' \item{reflist}{The reference list, sorted in decreasing order}
+#' \item{inSet1, inSet2}{Vectors of 0 and 1 marking the positions of the
+#' sorted reference list that belong to each set}
 #' }
 #' @examples
 #' reflist<-setNames(-sort(rnorm(1000)),paste0('gene',1:1000))
 #' set1<-paste0('gene',sample(1:200,50))
 #' set2<-paste0('gene',sample(801:1000,50))
 #' obj<-gsea2(reflist,set1,set2,method='pareto',np=1000)
-#' obj$p.value
+#' obj$p.value1
+#' obj$p.value2
 #' @export
 gsea2 <- function (reflist, set1,set2, method = c("permutation", "pareto"),
                    np = 1000, w = 1, gsea_null = NULL) {

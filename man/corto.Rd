@@ -36,9 +36,12 @@ will calculate linear regression between the gene expression data in the input m
 and the cnv data, and target profiles will be transformed to the residuals
 of each linear model exp~cnv. Default is NULL}
 
-\item{boot_threshold}{The fraction of bootstraps in which the edge should appear
-to be included in the final network. It can be any number between 0.0 and 1.0.
-Default is 0.0.}
+\item{boot_threshold}{The likelihood an edge must exceed to be included in the
+final network. The likelihood is the number of times the edge survived DPI, in
+the original matrix and in the bootstraps, divided by \code{nbootstraps+1}.
+Only edges with a likelihood strictly higher than \code{boot_threshold} are
+kept: the default, 0.0, keeps every edge that survived DPI at least once, and
+1.0 removes all edges.}
 
 \item{dpi}{The DPI rule, passed to \code{\link{dpi_edges}}: \code{"target"}
 (default, one winning centroid per target, as in previous versions) or

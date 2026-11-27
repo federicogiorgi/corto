@@ -12,11 +12,13 @@ wstouffer(x, w)
 \item{w}{weight for each Z score}
 }
 \value{
-Z an integrated Z score
+An integrated Z score
 }
 \description{
-This function gives a gaussian Z-score corresponding to the provided p-value
-Careful: sign is not provided
+This function combines a vector of Z-scores into a single Z-score with the
+weighted Stouffer method: the sum of the Z-scores multiplied by their weights,
+divided by the square root of the sum of the squared weights. Signs are kept,
+so Z-scores of opposite sign cancel out.
 }
 \examples{
 zs<-c(1,-3,5,2,3)

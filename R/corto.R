@@ -88,9 +88,12 @@ dpi_edges<-function(centroid,target,cor,rule=c("target","triangle"),centroid_cor
 #' @param nbootstraps Number of bootstraps to be performed. Default is 100
 #' @param p The p-value threshold for correlation significance (by default 1E-30)
 #' @param nthreads The number of threads to use for bootstrapping. Default is 1
-#' @param boot_threshold The fraction of bootstraps in which the edge should appear
-#'  to be included in the final network. It can be any number between 0.0 and 1.0.
-#'  Default is 0.0.
+#' @param boot_threshold The likelihood an edge must exceed to be included in the
+#'  final network. The likelihood is the number of times the edge survived DPI, in
+#'  the original matrix and in the bootstraps, divided by \code{nbootstraps+1}.
+#'  Only edges with a likelihood strictly higher than \code{boot_threshold} are
+#'  kept: the default, 0.0, keeps every edge that survived DPI at least once, and
+#'  1.0 removes all edges.
 #' @param dpi The DPI rule, passed to \code{\link{dpi_edges}}: \code{"target"}
 #'  (default, one winning centroid per target, as in previous versions) or
 #'  \code{"triangle"} (the ARACNe rule over centroid-centroid-target triangles).

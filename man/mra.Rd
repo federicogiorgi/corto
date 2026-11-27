@@ -38,9 +38,8 @@ provided (single sample mra).}
 
 \item{verbose}{Boolean, whether to print full messages on progress analysis. Default is FALSE}
 
-\item{atacseq}{An optional 3 column matrix derived from an ATAC-Seq analysis, indicating
-1) gene symbol, 2) -log10(FDR)*sing(log2FC) of an ATAC-Seq design, 3) distance from TSS.
-If provided, the output will contain an _atacseq_ field.}
+\item{atacseq}{Currently not used. Reserved for a future integration of ATAC-Seq data;
+any value provided is ignored. Default is NULL}
 }
 \value{
 A list summarizing the master regulator analysis
@@ -51,9 +50,6 @@ vector in multisample and signature mode, a matrix in sample-by-sample mode.
 \item pvalue: the pvalue of the enrichment.
 \item sig: the calculated signature (useful for plotting).
 \item regulon: the original regulon used in the analysis (but filtered for _minsize_)
-\item atac: Optionally present if atacseq data is provided. For each centroid/TF a number
-ranging from 0 to 1 will indicate the fraction of changes in activity due to promoter effects
-rather than distal effects.
 }
 }
 \description{

@@ -10,11 +10,12 @@ stouffer(x)
 \item{x}{a vector of Z scores}
 }
 \value{
-Z an integrated Z score
+An integrated Z score
 }
 \description{
-This function gives a gaussian Z-score corresponding to the provided p-value
-Careful: sign is not provided
+This function combines a vector of Z-scores into a single Z-score with the
+Stouffer method: the sum of the Z-scores divided by the square root of their
+number. Signs are kept, so Z-scores of opposite sign cancel out.
 }
 \examples{
 zs<-c(1,3,5,2,3)

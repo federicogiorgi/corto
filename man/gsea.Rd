@@ -28,12 +28,19 @@ scores unchanged)}
 \item{gsea_null}{a GSEA null distribution (Optional)}
 }
 \value{
-A GSEA object. Basically a list of s components:
+A list of class \code{gsea}, with components:
 \describe{
-\item{ES}{The enrichment score}
-\item{NES}{The normalized enrichment socre}
-\item{ledge}{The items in the leading edge}
-\item{p.value}{The permutation-based p-value}
+\item{es}{The enrichment score}
+\item{nes}{The normalized enrichment score}
+\item{p.value}{The p-value, from permutations (refined by a Pareto tail fit
+when \code{method='pareto'})}
+\item{ledge}{The elements of the set in the leading edge}
+\item{running_score}{The running enrichment score along the sorted
+reference list}
+\item{set}{The elements of the set found in the reference list}
+\item{reflist}{The reference list, sorted in decreasing order}
+\item{inSet}{A vector of 0 and 1 marking the positions of the sorted
+reference list that belong to the set}
 }
 }
 \description{

@@ -2,6 +2,6 @@
 ^corto\.Rproj$
 ^\.Rproj\.user$
 ^R/deleteme\.R$
-^/tmp$
+^tmp$
 ^README\.md$
 ^extras$

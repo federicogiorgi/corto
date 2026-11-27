@@ -37,6 +37,18 @@
   and no longer ships its whole environment to the workers.
 * Results are bit-identical to version 1.4.1.
 
+## Documentation
+
+* `mra()`: the `atacseq` argument is documented as currently not used, and the
+  `atac` field, which was never returned, is removed from the description of
+  the output.
+* `gsea()` and `gsea2()`: the help pages list the components actually returned,
+  with their real names. The `gsea2()` example printed `NULL`.
+* `stouffer()` and `wstouffer()`: descriptions rewritten; they were copied from
+  `p2z()`.
+* `corto()`: `boot_threshold` is described as what it is, a likelihood that
+  edges must exceed.
+
 # corto 1.4.1
 
 * Documented default of `mra(nthreads=)` corrected to 2.
